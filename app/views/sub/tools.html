@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--suppress ALL -->
+<html lang="en-EN">
+  <head>
+    <title>Tools</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+
+    <style>
+      #timer {
+        padding: 10px 15px;
+      }
+
+      #time-actions {
+        display: flex;
+        justify-content: space-around;
+      }
+
+      #timer-text {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        color: darkcyan;
+        left: 50%;
+        top: 50%;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      #line {
+        margin-top: 15px;
+        position: relative;
+      }
+
+      .select {
+        border-radius: 5px;
+        min-height: 35px;
+        padding: 5px 10px;
+        background: #eeeeee;
+        color: darkcyan;
+        font-weight: 600;
+        z-index: 99;
+      }
+
+      .select option {
+        color: darkcyan !important;
+        z-index: 99;
+      }
+    </style>
+  </head>
+
+  <body class="sub-window">
+    <div class="d-flex w-100 h-100 flex-column">
+      <ul class="nav justify-content-between" id="toolTab">
+        <li class="nav-item w-50">
+          <a class="nav-link active btn-tab" href="#systemTimer">Sleep/ShutDown Timer</a>
+        </li>
+        <li class="nav-item w-50">
+          <a class="nav-link btn-tab" href="#pictureSorter">Picture Sorter</a>
+        </li>
+      </ul>
+      <div class="tab-content" id="tabContent">
+        <div class="tab-pane fade show active" id="systemTimer" role="tabpanel" aria-labelledby="systemTimer-tab">
+          <div id="timer">
+            <div class="d-flex align-items-center">
+              <div class="form-group col-sm-6">
+                <span class="input-number-decrement">–</span>
+                <input class="input-number" name="time" id="time" placeholder="Time" type="text" value="1" min="0" max="60" />
+                <span class="input-number-increment">+</span>
+              </div>
+              <div class="form-group radio-buttons no-select col-sm-6" id="times">
+                <div class="form-check form-check-inline col-sm-3">
+                  <input class="form-check-input" type="radio" name="time-length" id="time-length-second" value="second" checked="checked" />
+                  <label class="form-check-label" for="time-length-second"> Second </label>
+                  <div class="check">
+                    <div class="inside"></div>
+                  </div>
+                </div>
+                <div class="form-check form-check-inline col-sm-3">
+                  <input class="form-check-input" type="radio" name="time-length" id="time-length-minute" value="minute" />
+                  <label class="form-check-label" for="time-length-minute"> Minute </label>
+                  <div class="check">
+                    <div class="inside"></div>
+                  </div>
+                </div>
+                <div class="form-check form-check-inline col-sm-3">
+                  <input class="form-check-input" type="radio" name="time-length" id="time-length-hour" value="hour" />
+                  <label class="form-check-label" for="time-length-hour"> Hour </label>
+                  <div class="check">
+                    <div class="inside"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <select class="select w-100" name="action" id="action">
+                <option value="" disabled selected>Select Action When Time is Up</option>
+                <option value="shutdown">Shutdown PC</option>
+                <option value="sleep">Sleep PC</option>
+                <option value="lock">Lock PC</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="d-none justify-content-around" id="time-actions">
+                <button id="add-time" class="btn btn-success col-log-3">Add Time</button>
+                <button id="reduce-time" value="reduce" class="btn btn-warning col-log-3">Reduce Time</button>
+                <button id="stop-timer" style="display: none" class="btn btn-danger col-log-3">Stop Timer</button>
+              </div>
+              <button id="start-timer" class="btn default w-100">Start</button>
+              <button id="disable-shutdown" class="btn default w-100 d-none">Disable Shutdown</button>
+            </div>
+            <div id="line">
+              <p id="timer-text"></p>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="pictureSorter" role="tabpanel" aria-labelledby="pictureSorter-tab">
+          <strong>We are developing...</strong>
+        </div>
+      </div>
+    </div>
+    <script src="../../../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../../../node_modules/jquery-contextmenu/dist/jquery.contextMenu.min.js"></script>
+    <script src="../../../node_modules/popper.js/dist/umd/popper.min.js"></script>
+    <script src="../../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="../../../node_modules/progressbar.js/dist/progressbar.min.js"></script>
+    <script src="../../app.js"></script>
+    <script src="../../tools.js"></script>
+  </body>
+</html>

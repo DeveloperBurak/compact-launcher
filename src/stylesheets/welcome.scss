@@ -1,0 +1,51 @@
+#welcomeScene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: #525252;
+  h2,
+  p,
+  button {
+    color: white;
+  }
+  button {
+    background-color: darkcyan;
+  }
+  .introduction,
+  .take-action {
+    width: 75%;
+  }
+  .btn-link {
+    background-color: transparent;
+    padding: 0;
+    text-decoration: underline;
+  }
+  .introduction {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: 200px;
+    overflow-y: hidden;
+    > div {
+      &:not(:first-child) {
+        display: none;
+      }
+    }
+  }
+  .take-action {
+    display: flex;
+    button {
+      max-width: 40%;
+      &:not(:first-child) {
+        display: none;
+      }
+    }
+  }
+  .fas {
+    color: darkcyan;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+  }
+}
