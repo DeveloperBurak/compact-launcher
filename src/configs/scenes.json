@@ -1,0 +1,22 @@
+{
+  "collapsedScreen": {
+    "width": 20,
+    "height": 30,
+    "transparent": false,
+    "type": "toolbar",
+    "show": false
+  },
+  "expandedScreen": {
+    "show": false,
+    "transparent": true
+  },
+  "steamDialogue": {
+    "width": 500,
+    "height": 500,
+    "transparent": true,
+    "show": false,
+    "center": true,
+    "alwaysOnTop": false,
+    "skipTaskbar": false
+  }
+}

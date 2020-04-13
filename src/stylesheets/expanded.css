@@ -1,0 +1,95 @@
+@import "~alertifyjs/build/css/alertify.min.css";
+@import "~alertifyjs/build/css/themes/bootstrap.min.css";
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+#expandedScene {
+  position: relative;
+  margin-left: -500px;
+}
+
+.btn.disabled, .btn:disabled {
+  opacity: 1;
+}
+
+.ajs-modal {
+  display: flex;
+}
+
+.ajs-modal .ajs-dialog {
+  margin: auto;
+  top: 0;
+  left: 0;
+}
+
+#program-list {
+  z-index: 2;
+  padding-left: 5px;
+  padding-top: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(to right, rgba(33, 33, 33, 1) 0%, rgba(33, 33, 33, 0.70) 30%, rgba(66, 66, 66, 0.20) 80%, rgba(66, 66, 66, 0.0) 100%);
+}
+
+.btn.list {
+  background-color: #525252;
+  color: white;
+  width: 100%;
+  border-radius: 25px;
+  padding: 5px;
+  margin: 2px 0;
+}
+
+.btn.list.active {
+  background-color: darkcyan;
+}
+
+button:focus {
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.btn.program {
+  color: #ddd;
+  font-size: 13px;
+}
+
+#program-preview-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1;
+}
+
+#program-preview-container img {
+  width: 100%;
+  height: 100%;
+}
+
+.btn-user {
+  background-color: transparent;
+}
+
+.btn-user i {
+  color: #dddddd;
+}
+
+.btn-user:hover i {
+  color: darkcyan !important;
+}
+
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn.auth-steam svg {
+  color: #2a475e;
+}
