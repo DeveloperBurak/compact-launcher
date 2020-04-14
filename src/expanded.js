@@ -10,7 +10,7 @@ const expandedScene = $('#expandedScene');
 const programContainer = $('#program-container');
 const programListCover = $('#program-list');
 
-let SteamUser;
+let appUser;
 
 if (env.name === 'development') {
   programPreviewContainer.on("click", e => {
@@ -18,9 +18,11 @@ if (env.name === 'development') {
   });
 } else {
   programListCover.on("mouseleave", e => {
-    programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
-      ipcRenderer.send("window:close:expanded");
-    });
+    if($('.modal').is(':hidden')){
+      programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
+        ipcRenderer.send("window:close:expanded");
+      });
+    }
   });
 }
 
@@ -30,9 +32,8 @@ ipcRenderer.on('window:close:expand', (e, items) => {
 });
 
 ipcRenderer.on('steam:user:get', (e, user) => {
-  SteamUser = user;
-  console.log(user);
-  $('#user-name').html("Welcome " + user.account.persona);
+  appUser = user;
+  $('#user-name').html("Welcome, " + user.account.persona);
   const button = $('.auth-steam');
   button.attr('authorized', true);
   button.attr('disabled',true);

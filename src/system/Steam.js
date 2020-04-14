@@ -1,7 +1,6 @@
 import File from "./File";
 import {fileExists, readVdf} from '../helpers/file';
 import Store from "electron-store";
-
 const store = new Store();
 
 const fs = require('fs');
@@ -54,7 +53,15 @@ class Steam {
                 }
                 reject(err);
               }
-              resolve(JSON.parse(data.toString('utf8')));
+              try{
+                resolve(JSON.parse(data.toString('utf8')));
+              }catch (e) {
+                fs.unlink(steamUserFile,() =>{
+                  console.log('deleted');
+                  this.getUser();
+                });
+                reject(e.getMessage);
+              }
             });
           } else {
             reject('file not found');
@@ -91,7 +98,8 @@ class Steam {
                 account: {
                   persona: selectedUser.PersonaName,
                   name: selectedUser.AccountName,
-                  id: selectedUser.id
+                  id: selectedUser.id,
+                  steam: true
                 }
               };
               store.set('user', userObject);
@@ -113,6 +121,10 @@ class Steam {
         fs.writeFileSync(steamUserFile, JSON.stringify(userObject));
       });
     });
+  }
+
+  deleteUser(){
+
   }
 
   isUserExists() {
