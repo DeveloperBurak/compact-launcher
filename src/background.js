@@ -47,6 +47,11 @@ ipcMain.on('cache:programs', (err, cache) => {
   store.set('cache.programs', cache.html);
 });
 
+
+ipcMain.on('cache:programs:remove', () => {
+  store.delete('cache.programs');
+});
+
 ipcMain.on('window:expand', (err, data) => {
   openExpandedScene(data);
 });

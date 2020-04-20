@@ -3,6 +3,7 @@ import "./stylesheets/expanded.css";
 import {ipcRenderer} from "electron";
 import env from "env";
 import $ from "jquery";
+
 const alertify = require('alertifyjs');
 
 const programPreviewContainer = $('#program-preview-container');
@@ -18,7 +19,7 @@ if (env.name === 'development') {
   });
 } else {
   programListCover.on("mouseleave", e => {
-    if($('.modal').is(':hidden')){
+    if ($('.modal').is(':hidden')) {
       programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
         ipcRenderer.send("window:close:expanded");
       });
@@ -36,7 +37,7 @@ ipcRenderer.on('steam:user:get', (e, user) => {
   $('#user-name').html("Welcome, " + user.account.persona);
   const button = $('.auth-steam');
   button.attr('authorized', true);
-  button.attr('disabled',true);
+  button.attr('disabled', true);
   button.find('path').attr('fill', button.find('path').attr('secondary'));
 });
 
@@ -104,8 +105,13 @@ $(document).ready(() => {
       button.find('path').attr('fill', button.find('path').attr('primary'));
     }
   });
-  $('.auth-steam').on('click', (e) => {
+  $('.auth-steam').on('click', () => {
     ipcRenderer.send('steam:check:exists');
+  });
+
+  $('.btn-refresh-programs').on('click', () => {
+    ipcRenderer.send('cache:programs:remove');
+    ipcRenderer.send("window:close:expanded");
   });
 });
 
