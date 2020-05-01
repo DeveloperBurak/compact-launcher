@@ -39,7 +39,7 @@ export default (name, options) => {
     options.width = width;
     options.height = height;
   }
-  win = new BrowserWindow(Object.assign({}, options, state));
+  win = new BrowserWindow(Object.assign({}, options));
   win.setTitle("Compact Launcher");
   win.setSize(options.width, options.height);
   if (options.x && options.y) {

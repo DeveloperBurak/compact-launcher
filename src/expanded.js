@@ -3,6 +3,7 @@ import "./stylesheets/expanded.css";
 import {ipcRenderer} from "electron";
 import env from "env";
 import $ from "jquery";
+import {cacheScannedPrograms, closeExpandWindow, getSteamUser, getUserAnswer, isSteamExists, isSteamUserExists, launchProgram, removeProgramCache, renderItem} from "./helpers/ipcActions";
 
 const alertify = require('alertifyjs');
 
@@ -15,24 +16,24 @@ let appUser;
 
 if (env.name === 'development') {
   programPreviewContainer.on("click", e => {
-    ipcRenderer.send("window:close:expanded");
+    ipcRenderer.send(closeExpandWindow);
   });
 } else {
   programListCover.on("mouseleave", e => {
     if ($('.modal').is(':hidden')) {
       programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
-        ipcRenderer.send("window:close:expanded");
+        ipcRenderer.send(closeExpandWindow);
       });
     }
   });
 }
 
 
-ipcRenderer.on('window:close:expand', (e, items) => {
-  ipcRenderer.send("window:close:expanded");
+ipcRenderer.on('window:close:expand', () => {
+  ipcRenderer.send(closeExpandWindow);
 });
 
-ipcRenderer.on('steam:user:get', (e, user) => {
+ipcRenderer.on(getSteamUser, (e, user) => {
   appUser = user;
   $('#user-name').html("Welcome, " + user.account.persona);
   const button = $('.auth-steam');
@@ -41,12 +42,12 @@ ipcRenderer.on('steam:user:get', (e, user) => {
   button.find('path').attr('fill', button.find('path').attr('secondary'));
 });
 
-ipcRenderer.on('items:render', (e, items) => {
+ipcRenderer.on(renderItem, (e, items) => {
   if (items.hasOwnProperty('cache')) {
     programContainer.append(items.cache);
   } else {
     renderPrograms(items['categories']).then(() => {
-      ipcRenderer.send('cache:programs', {html: programContainer.html()});
+      ipcRenderer.send(cacheScannedPrograms, {html: programContainer.html()});
     });
   }
 });
@@ -83,7 +84,7 @@ $(document).ready(() => {
   });
   body.on('click', '.btn.program', e => {
     const button = $(e.currentTarget);
-    ipcRenderer.send('program:launch', button.attr('execute'));
+    ipcRenderer.send(launchProgram, button.attr('execute'));
   });
   $('.btn-user').on('click', () => {
     $('.modal.user').show();
@@ -106,22 +107,22 @@ $(document).ready(() => {
     }
   });
   $('.auth-steam').on('click', () => {
-    ipcRenderer.send('steam:check:exists');
+    ipcRenderer.send(isSteamExists);
   });
 
   $('.btn-refresh-programs').on('click', () => {
-    ipcRenderer.send('cache:programs:remove');
-    ipcRenderer.send("window:close:expanded");
+    ipcRenderer.send(removeProgramCache);
+    ipcRenderer.send(closeExpandWindow);
   });
 });
 
-ipcRenderer.on('steam:exists', (e, exists) => {
+ipcRenderer.on(isSteamUserExists, (e, exists) => {
   if (exists) {
     alertify.confirm('Compact Launcher', 'Steam Found. Do you want to add recent user?', () => {
-        ipcRenderer.send('stem:user:answer', true);
+        ipcRenderer.send(getUserAnswer, true);
       }
       , () => {
-        ipcRenderer.send('stem:user:answer', false);
+        ipcRenderer.send(getUserAnswer, false);
       }).set({labels: {ok: 'Yes', cancel: 'No'}});
   }
 });

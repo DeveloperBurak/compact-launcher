@@ -10,6 +10,23 @@ import {trayMenuTemplate} from './menu/tray_menu_template';
 import User from './system/User';
 import File from "./system/File";
 import Steam from "./system/Steam";
+import {BrowserWindow} from "electron";
+
+import {
+  cacheScannedPrograms,
+  closeExpandWindow,
+  expandWindow,
+  getSteamUser,
+  getUserAnswer,
+  isSteamExists,
+  isSteamUserExists,
+  itemsReady,
+  launchProgram,
+  removeProgramCache,
+  renderItem,
+  scanPrograms
+} from "./helpers/ipcActions";
+import ActiveWindowTracker from "./system/ActiveWindowTracker";
 
 const AutoLaunch = require('auto-launch');
 const store = new Store();
@@ -30,49 +47,54 @@ app.on("ready", () => {
   File.createRequiredFolders();
   setAutoLaunch();
   setTray();
+  ActiveWindowTracker.start((isForbidden) => {
+    BrowserWindow.getAllWindows().filter(window => {
+      window.setAlwaysOnTop(!isForbidden);
+    })
+  });
 });
 
-ipcMain.on('system:scan:programs', async () => {
+
+ipcMain.on(scanPrograms, async () => {
   const cacheHTML = store.get('cache.programs');
   if (cacheHTML != null) {
-    mainWindow.webContents.send('items:ready', {cache: cacheHTML});
+    mainWindow.webContents.send(itemsReady, {cache: cacheHTML});
   } else {
     await ProgramHandler.readShortcutFolder().then(items => {
-      mainWindow.webContents.send('items:ready', items);
+      mainWindow.webContents.send(itemsReady, items);
     });
   }
 });
 
-ipcMain.on('cache:programs', (err, cache) => {
+ipcMain.on(cacheScannedPrograms, (err, cache) => {
   store.set('cache.programs', cache.html);
 });
 
-
-ipcMain.on('cache:programs:remove', () => {
+ipcMain.on(removeProgramCache, () => {
   store.delete('cache.programs');
 });
 
-ipcMain.on('window:expand', (err, data) => {
+ipcMain.on(expandWindow, (err, data) => {
   openExpandedScene(data);
 });
 
-ipcMain.on('window:close:expanded', async () => {
+ipcMain.on(closeExpandWindow, async () => {
   await openCollapsedWindow();
   expandedScene.close();
 });
 
-ipcMain.on('program:launch', (err, file) => {
+ipcMain.on(launchProgram, (err, file) => {
   ProgramHandler.launch(file);
-  expandedScene.webContents.send('window:close:expand');
+  expandedScene.webContents.send(closeExpandWindow);
 });
 
-ipcMain.on('stem:user:answer', (err, response) => {
+ipcMain.on(getUserAnswer, (err, response) => {
   Steam.setUser(response);
 });
 
-ipcMain.on('steam:check:exists', (err, response) => {
+ipcMain.on(isSteamExists, () => {
   User.getSteamUser().then(steamPath => {
-    expandedScene.webContents.send('steam:exists', (steamPath !== null));
+    expandedScene.webContents.send(isSteamUserExists, (steamPath !== null));
   });
 });
 
@@ -109,10 +131,10 @@ const openExpandedScene = (data) => {
 
   expandedScene.on('ready-to-show', () => {
     expandedScene.show();
-    expandedScene.webContents.send('items:render', data);
+    expandedScene.webContents.send(renderItem, data);
     Steam.getUser().then(user => {
       if (user.account !== false) {
-        expandedScene.webContents.send('steam:user:get', user);
+        expandedScene.webContents.send(getSteamUser, user);
       }
     });
     mainWindow.close();
