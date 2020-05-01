@@ -21,12 +21,13 @@ import {
   isSteamExists,
   isSteamUserExists,
   itemsReady,
-  launchProgram,
+  launchProgram, removeProgram,
   removeProgramCache,
   renderItem,
   scanPrograms
 } from "./helpers/ipcActions";
 import ActiveWindowTracker from "./system/ActiveWindowTracker";
+import {removeFile} from "./helpers/file";
 
 const AutoLaunch = require('auto-launch');
 const store = new Store();
@@ -88,6 +89,15 @@ ipcMain.on(launchProgram, (err, file) => {
   expandedScene.webContents.send(closeExpandWindow);
 });
 
+ipcMain.on(removeProgram, (err, path) => {
+  removeFile(path).then(deleted => {
+    if(deleted){
+      console.log('silindi')
+      store.delete('cache.programs');
+    }
+  })
+});
+
 ipcMain.on(getUserAnswer, (err, response) => {
   Steam.setUser(response);
 });
@@ -126,7 +136,7 @@ const openExpandedScene = (data) => {
     })
   );
   if (env.name === "development") {
-    // expandedScene.openDevTools();
+    expandedScene.openDevTools();
   }
 
   expandedScene.on('ready-to-show', () => {

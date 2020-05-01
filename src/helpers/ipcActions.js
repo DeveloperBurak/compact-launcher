@@ -10,6 +10,7 @@ export const isSteamExists = 'steam:check:exists';
 export const getUserAnswer = 'stem:user:answer';
 
 export const launchProgram = 'program:launch';
+export const removeProgram = 'program:remove';
 
 export const expandWindow = 'window:expand';
 export const closeExpandWindow = 'window:close:expanded';

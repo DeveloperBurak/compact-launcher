@@ -26,3 +26,13 @@ export const fileExists = (file) => {
     }
   });
 };
+
+export const removeFile = (path) => {
+  return new Promise((resolve, reject) => {
+    fs.unlink(path, (err) => {
+      if (err === null) {
+        resolve(true);
+      }
+    })
+  });
+};

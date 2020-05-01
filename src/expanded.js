@@ -3,7 +3,18 @@ import "./stylesheets/expanded.css";
 import {ipcRenderer} from "electron";
 import env from "env";
 import $ from "jquery";
-import {cacheScannedPrograms, closeExpandWindow, getSteamUser, getUserAnswer, isSteamExists, isSteamUserExists, launchProgram, removeProgramCache, renderItem} from "./helpers/ipcActions";
+import {
+  cacheScannedPrograms,
+  closeExpandWindow,
+  getSteamUser,
+  getUserAnswer,
+  isSteamExists,
+  isSteamUserExists,
+  launchProgram,
+  removeProgram,
+  removeProgramCache,
+  renderItem
+} from "./helpers/ipcActions";
 
 const alertify = require('alertifyjs');
 
@@ -77,10 +88,21 @@ $(document).ready(() => {
       button.removeClass('active');
     }
   });
-  body.on('mouseenter', '.btn.program', e => {
-    const button = $(e.currentTarget);
+  body.on('mouseenter', '.program-cover', e => {
+    const cover = $(e.currentTarget);
+    const button = cover.children('.btn.program');
     programPreviewContainer.children('img').attr('src', button.attr('image'));
     programPreviewContainer.removeClass('d-none');
+    cover.children('.btn.delete-program').show();
+  }).on('mouseleave', '.program-cover', e => {
+    const cover = $(e.currentTarget);
+    cover.children('.delete-program').hide();
+  });
+  body.on('click', '.btn.delete-program', (e) => {
+    const button = $(e.currentTarget);
+    ipcRenderer.send(removeProgram, button.attr('del'));
+    // TODO check is deleted for more stability
+    button.parent().remove();
   });
   body.on('click', '.btn.program', e => {
     const button = $(e.currentTarget);
@@ -160,6 +182,11 @@ const generateList = (list, inner = false) => {
 
 const renderButton = (value) => {
   if (value.hasOwnProperty('file')) {
-    return '<li><button class="btn program" image="' + value.image + '" execute="' + value.exePath + '">' + value.name + '</button></li>';
+    return '<li class="program-cover">' +
+      '<button class="btn program col-sm-11" image="' + value.image + '" execute="' + value.exePath + '">' +
+      '<p class="float-left">' + value.name + '</p> ' +
+      '</button>' +
+      '<button  class="btn col-sm-1 delete-program float-right" del="' + value.exePath + '">X</button>' +
+      '</li>';
   }
 };
