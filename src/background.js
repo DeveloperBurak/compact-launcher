@@ -43,6 +43,11 @@ let expandedScene = null;
 
 let tray = null;
 
+const version = Number.parseFloat(app.getVersion());
+if (version !== store.get('app.version') || version < 0.4) {
+  store.delete('cache.programs');
+}
+
 app.on("ready", () => {
   openCollapsedWindow();
   File.createRequiredFolders();
@@ -68,6 +73,7 @@ ipcMain.on(scanPrograms, async () => {
 });
 
 ipcMain.on(cacheScannedPrograms, (err, cache) => {
+  store.set('app.version', version);
   store.set('cache.programs', cache.html);
 });
 
@@ -98,8 +104,8 @@ ipcMain.on(removeProgram, (err, path) => {
 });
 
 ipcMain.on(removeImageFromProgram, (err, imagePath) => {
-  removeFile(imagePath).then(deleted =>{
-    if(deleted){
+  removeFile(imagePath).then(deleted => {
+    if (deleted) {
       store.delete('cache.programs');
     }
   })
