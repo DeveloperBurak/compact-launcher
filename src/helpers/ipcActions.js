@@ -11,6 +11,8 @@ export const getUserAnswer = 'stem:user:answer';
 
 export const launchProgram = 'program:launch';
 export const removeProgram = 'program:remove';
+export const removeImageFromProgram = 'program:remove:image';
+export const addImageFromProgram = 'program:add:image';
 
 export const expandWindow = 'window:expand';
 export const closeExpandWindow = 'window:close:expanded';

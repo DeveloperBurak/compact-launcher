@@ -4,19 +4,26 @@ import {ipcRenderer} from "electron";
 import env from "env";
 import $ from "jquery";
 import {
+  addImageFromProgram,
   cacheScannedPrograms,
   closeExpandWindow,
   getSteamUser,
   getUserAnswer,
   isSteamExists,
   isSteamUserExists,
-  launchProgram,
+  launchProgram, removeImageFromProgram,
   removeProgram,
   removeProgramCache,
   renderItem
 } from "./helpers/ipcActions";
 
+// noinspection JSUnusedLocalSymbols
+const contextMenu = require('jquery-contextmenu');
 const alertify = require('alertifyjs');
+const {dialog} = require('electron').remote;
+const window = require('electron').remote.getCurrentWindow();
+// noinspection JSUnusedLocalSymbols
+const tooltip = require('bootstrap').Tooltip;
 
 const programPreviewContainer = $('#program-preview-container');
 const expandedScene = $('#expandedScene');
@@ -31,7 +38,7 @@ if (env.name === 'development') {
   });
 } else {
   programListCover.on("mouseleave", e => {
-    if ($('.modal').is(':hidden')) {
+    if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
       programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
         ipcRenderer.send(closeExpandWindow);
       });
@@ -64,6 +71,8 @@ ipcRenderer.on(renderItem, (e, items) => {
 });
 
 $(document).ready(() => {
+  $('[data-toggle="tooltip"]').tooltip();
+
   const body = $('body');
   expandedScene.css('margin-left', '-' + expandedScene.width() + 'px');
   expandedScene.animate({"margin-left": '+=' + expandedScene.width() + 'px'}, 500);
@@ -92,12 +101,17 @@ $(document).ready(() => {
     const cover = $(e.currentTarget);
     const button = cover.children('.btn.program');
     programPreviewContainer.children('img').attr('src', button.attr('image'));
-    programPreviewContainer.removeClass('d-none');
+    if (button.attr('image') != null) {
+      programPreviewContainer.removeClass('d-none');
+    } else {
+      programPreviewContainer.addClass('d-none');
+    }
     cover.children('.btn.delete-program').show();
   }).on('mouseleave', '.program-cover', e => {
     const cover = $(e.currentTarget);
     cover.children('.delete-program').hide();
   });
+
   body.on('click', '.btn.delete-program', (e) => {
     const button = $(e.currentTarget);
     ipcRenderer.send(removeProgram, button.attr('del'));
@@ -112,9 +126,7 @@ $(document).ready(() => {
     $('.modal.user').show();
   });
   $('.modal .close').on('click', (e) => {
-    console.log('clicked');
     const button = $(e.currentTarget);
-    console.log(button.closest('.modal').attr('class'));
     button.closest('.modal').hide();
   });
   $('.btn-auth-program').on('mouseenter', (e) => {
@@ -136,6 +148,46 @@ $(document).ready(() => {
     ipcRenderer.send(removeProgramCache);
     ipcRenderer.send(closeExpandWindow);
   });
+  $.contextMenu({
+    selector: ".program-cover",
+    items: {
+      image: {
+        name: 'Image',
+        items: {
+          remove: {
+            name: "Remove",
+            callback: (key, opt) => {
+              const button = $(opt.$trigger).children('.btn.program');
+              const imagePath = button.attr('image');
+              // TODO check is deleted for more stability
+              ipcRenderer.send(removeImageFromProgram, imagePath);
+              button.removeAttr('image');
+              programPreviewContainer.addClass('d-none');
+            }
+          },
+          add: {
+            name: "Select New",
+            callback: function (key, opt) {
+              dialog.showOpenDialog(window, {
+                properties: ['openFile']
+              }, function (file) {
+                if (file !== undefined) {
+                  ipcRenderer.send(addImageFromProgram, file);
+                }
+              });
+            }
+          }
+        }
+      },
+    }
+  });
+});
+
+$('.program-cover').bind("contextmenu", (e) => {
+  // Avoid the real one
+  e.preventDefault();
+  const button = $(e.currentTarget);
+  console.log(button)
 });
 
 ipcRenderer.on(isSteamUserExists, (e, exists) => {

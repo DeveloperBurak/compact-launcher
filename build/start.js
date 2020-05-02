@@ -3,7 +3,8 @@ const electron = require("electron");
 const webpack = require("webpack");
 const config = require("./webpack.app.config");
 
-const env = "development";
+// const env = "development";
+const env = "production";
 const compiler = webpack(config(env));
 let electronStarted = false;
 

@@ -9,32 +9,32 @@ export default (name, options) => {
   let win;
 
   // default assigning
-  if (!options.frame) {
+  if (options.frame == null) {
     options.frame = false;
   }
-  if (!options.transparent) {
+  if (options.transparent == null) {
     options.transparent = false;
   }
-  if (!options.useContentSize) {
+  if (options.useContentSize == null) {
     options.useContentSize = false;
   }
-  if (typeof options.alwaysOnTop === 'undefined') {
+  if (options.alwaysOnTop == null) {
     options.alwaysOnTop = true;
   }
-  if (typeof options.skipTaskbar === 'undefined') {
+  if (options.skipTaskbar == null) {
     options.skipTaskbar = true;
   }
-  if (!options.resizable) {
+  if (options.resizable == null) {
     options.resizable = false;
   }
-  if (!options.center) {
+  if (options.center == null) {
     if (!(options.x && options.y)) {
       options.x = 0;
       options.y = 0;
     }
   }
 
-  if (!(options.width && options.height)) {
+  if (options.width == null && options.height == null) {
     const {width, height} = screen.getPrimaryDisplay().size;
     options.width = width;
     options.height = height;

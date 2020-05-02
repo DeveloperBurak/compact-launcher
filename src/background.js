@@ -21,7 +21,7 @@ import {
   isSteamExists,
   isSteamUserExists,
   itemsReady,
-  launchProgram, removeProgram,
+  launchProgram, removeImageFromProgram, removeProgram,
   removeProgramCache,
   renderItem,
   scanPrograms
@@ -91,8 +91,15 @@ ipcMain.on(launchProgram, (err, file) => {
 
 ipcMain.on(removeProgram, (err, path) => {
   removeFile(path).then(deleted => {
+    if (deleted) {
+      store.delete('cache.programs');
+    }
+  })
+});
+
+ipcMain.on(removeImageFromProgram, (err, imagePath) => {
+  removeFile(imagePath).then(deleted =>{
     if(deleted){
-      console.log('silindi')
       store.delete('cache.programs');
     }
   })

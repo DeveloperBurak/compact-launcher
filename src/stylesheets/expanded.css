@@ -1,6 +1,5 @@
 @import "~alertifyjs/build/css/alertify.min.css";
 @import "~alertifyjs/build/css/themes/bootstrap.min.css";
-
 ul {
   padding: 0;
   list-style: none;
@@ -62,6 +61,15 @@ button:focus {
   font-size: 13px;
   position: relative;
   z-index: 1;
+}
+
+.context-menu-list{
+  position: absolute;
+  background-color: white;
+}
+
+.btn.program:hover {
+  color: darkcyan;
 }
 
 .delete-program {

@@ -2,7 +2,7 @@
   "name": "compact-launcher",
   "productName": "Compact Launcher",
   "description": "Compact Launcher for Your Programs",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "author": "Burak Eren Karasu <developerburakeren@gmail.com>",
   "copyright": "PPROGA",
@@ -39,8 +39,10 @@
     "electron-store": "^5.1.1",
     "fs-jetpack": "^2.1.0",
     "jquery": "^3.4.1",
+    "jquery-contextmenu": "^2.9.0",
     "less-loader": "^5.0.0",
     "mkdirp": "^1.0.4",
+    "popper.js": "^1.16.1",
     "winreg": "^1.2.4"
   },
   "devDependencies": {
