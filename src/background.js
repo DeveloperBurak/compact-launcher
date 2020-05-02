@@ -13,6 +13,7 @@ import Steam from "./system/Steam";
 import {BrowserWindow} from "electron";
 
 import {
+  addImageFromProgram,
   cacheScannedPrograms,
   closeExpandWindow,
   expandWindow,
@@ -28,6 +29,8 @@ import {
 } from "./helpers/ipcActions";
 import ActiveWindowTracker from "./system/ActiveWindowTracker";
 import {removeFile} from "./helpers/file";
+import {programName, cacheProgramHTML} from "./configs/app";
+import Program from "./system/Program";
 
 const AutoLaunch = require('auto-launch');
 const store = new Store();
@@ -45,7 +48,7 @@ let tray = null;
 
 const version = Number.parseFloat(app.getVersion());
 if (version !== store.get('app.version') || version < 0.4) {
-  store.delete('cache.programs');
+  store.delete(cacheProgramHTML);
 }
 
 app.on("ready", () => {
@@ -62,7 +65,7 @@ app.on("ready", () => {
 
 
 ipcMain.on(scanPrograms, async () => {
-  const cacheHTML = store.get('cache.programs');
+  const cacheHTML = store.get(cacheProgramHTML);
   if (cacheHTML != null) {
     mainWindow.webContents.send(itemsReady, {cache: cacheHTML});
   } else {
@@ -74,11 +77,11 @@ ipcMain.on(scanPrograms, async () => {
 
 ipcMain.on(cacheScannedPrograms, (err, cache) => {
   store.set('app.version', version);
-  store.set('cache.programs', cache.html);
+  store.set(cacheProgramHTML, cache.html);
 });
 
 ipcMain.on(removeProgramCache, () => {
-  store.delete('cache.programs');
+  store.delete(cacheProgramHTML);
 });
 
 ipcMain.on(expandWindow, (err, data) => {
@@ -98,7 +101,7 @@ ipcMain.on(launchProgram, (err, file) => {
 ipcMain.on(removeProgram, (err, path) => {
   removeFile(path).then(deleted => {
     if (deleted) {
-      store.delete('cache.programs');
+      store.delete(cacheProgramHTML);
     }
   })
 });
@@ -106,9 +109,13 @@ ipcMain.on(removeProgram, (err, path) => {
 ipcMain.on(removeImageFromProgram, (err, imagePath) => {
   removeFile(imagePath).then(deleted => {
     if (deleted) {
-      store.delete('cache.programs');
+      store.delete(cacheProgramHTML);
     }
   })
+});
+
+ipcMain.on(addImageFromProgram, (err, items) => {
+  Program.addNewImage(items.file, items.name);
 });
 
 ipcMain.on(getUserAnswer, (err, response) => {
@@ -167,13 +174,13 @@ const openExpandedScene = (data) => {
 const setTray = () => {
   tray = new Tray(path.join(__dirname, 'assets/images/core/tray.ico'));
   const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
-  tray.setToolTip('Compact Launcher');
+  tray.setToolTip(programName);
   tray.setContextMenu(contextMenu);
 };
 
 const setAutoLaunch = (enabled = true) => {
   let autoLaunch = new AutoLaunch({
-    name: 'Compact Launcher',
+    name: programName,
     path: app.getPath('exe'),
   });
 

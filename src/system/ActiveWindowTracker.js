@@ -27,7 +27,7 @@ class ActiveWindowTracker {
   start(callback, interval = 1000) {
     setInterval(() => {
       activeWin().then(response => {
-        if(response.owner != null){
+        if(response != null){
           if (this.forbiddenApps.indexOf(response.owner.name) >= 0) {
             callback(true);
           } else {

@@ -156,6 +156,19 @@ $(document).ready(() => {
       image: {
         name: 'Image',
         items: {
+          add: {
+            name: "New Image",
+            callback: function (key, opt) {
+              dialog.showOpenDialog(window, {
+                properties: ['openFile']
+              }, function (file) {
+                if (file !== undefined) {
+                  const button = $(opt.$trigger).children(cSelector(v_programButton));
+                  ipcRenderer.send(addImageFromProgram, {file: file[0], name: button.attr('programName')});
+                }
+              });
+            }
+          },
           remove: {
             name: "Remove",
             callback: (key, opt) => {
@@ -165,18 +178,6 @@ $(document).ready(() => {
               ipcRenderer.send(removeImageFromProgram, imagePath);
               button.removeAttr('image');
               programPreviewContainer.addClass('d-none');
-            }
-          },
-          add: {
-            name: "Select New",
-            callback: function (key, opt) {
-              dialog.showOpenDialog(window, {
-                properties: ['openFile']
-              }, function (file) {
-                if (file !== undefined) {
-                  ipcRenderer.send(addImageFromProgram, file);
-                }
-              });
             }
           }
         }
@@ -229,7 +230,7 @@ const generateList = (list, inner = false) => {
 const renderButton = (value) => {
   if (value.hasOwnProperty('file')) {
     return '<li class="' + v_programCover + '">' +
-      '<button class="' + v_programButton + ' col-sm-11" image="' + value.image + '" execute="' + value.exePath + '">' +
+      '<button class="' + v_programButton + ' col-sm-11" programName="' + value.name + '" image="' + value.image + '" execute="' + value.exePath + '">' +
       '<p class="float-left">' + value.name + '</p> ' +
       '</button>' +
       '<button  class="' + v_deleteProgramButton + ' col-sm-1  float-right" del="' + value.exePath + '">X</button>' +

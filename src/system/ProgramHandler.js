@@ -26,7 +26,7 @@ class ProgramHandler {
     for (let item in data) {
       if (data[item].hasOwnProperty('file') && data[item].file === true) {
         if (!hasCategory) {
-          data['Uncategorized']['programs'][count] = Object.assign(data[count], {image: File.get('images'), exePath: data[count]['fullpath']});
+          data['Uncategorized']['programs'][count] = Object.assign(data[count], {image: path.join(File.get('images'), data[count]['name'] + '.jpg'), exePath: data[count]['fullpath']});
         } else {
           if (typeof data['programs'] == 'undefined') {
             data['programs'] = {};
