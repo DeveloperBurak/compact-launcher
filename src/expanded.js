@@ -11,11 +11,14 @@ import {
   getUserAnswer,
   isSteamExists,
   isSteamUserExists,
-  launchProgram, removeImageFromProgram,
+  launchProgram,
+  removeImageFromProgram,
   removeProgram,
   removeProgramCache,
   renderItem
 } from "./helpers/ipcActions";
+import {cSelector, v_deleteProgramButton, v_dropdownButton, v_dropdownList, v_programButton, v_programCover} from "./configs/object";
+import {programName} from "./configs/app";
 
 // noinspection JSUnusedLocalSymbols
 const contextMenu = require('jquery-contextmenu');
@@ -72,18 +75,17 @@ ipcRenderer.on(renderItem, (e, items) => {
 
 $(document).ready(() => {
   $('[data-toggle="tooltip"]').tooltip();
-
   const body = $('body');
   expandedScene.css('margin-left', '-' + expandedScene.width() + 'px');
   expandedScene.animate({"margin-left": '+=' + expandedScene.width() + 'px'}, 500);
 
-  body.on('click', '.dropdown-button', e => {
+  body.on('click', cSelector(v_dropdownButton), e => {
     const button = $(e.currentTarget);
     const dropdownList = button.siblings('.dropdown-list');
     // TODO improve there
     if (dropdownList.is(':hidden')) {
       if (!dropdownList.hasClass('inner')) {
-        const otherDropdowns = button.closest('#program-container').children('li').children('.dropdown-list');
+        const otherDropdowns = button.closest('#program-container').children('li').children(cSelector(v_dropdownList));
         otherDropdowns.slideUp(500);
         otherDropdowns.removeClass('active');
       }
@@ -97,28 +99,28 @@ $(document).ready(() => {
       button.removeClass('active');
     }
   });
-  body.on('mouseenter', '.program-cover', e => {
+  body.on('mouseenter', cSelector(v_programCover), e => {
     const cover = $(e.currentTarget);
-    const button = cover.children('.btn.program');
+    const button = cover.children(cSelector(v_programButton));
     programPreviewContainer.children('img').attr('src', button.attr('image'));
     if (button.attr('image') != null) {
       programPreviewContainer.removeClass('d-none');
     } else {
       programPreviewContainer.addClass('d-none');
     }
-    cover.children('.btn.delete-program').show();
-  }).on('mouseleave', '.program-cover', e => {
+    cover.children(cSelector(v_deleteProgramButton)).show();
+  }).on('mouseleave', cSelector(v_programCover), e => {
     const cover = $(e.currentTarget);
-    cover.children('.delete-program').hide();
+    cover.children(cSelector(v_deleteProgramButton)).hide();
   });
 
-  body.on('click', '.btn.delete-program', (e) => {
+  body.on('click', cSelector(v_deleteProgramButton), (e) => {
     const button = $(e.currentTarget);
     ipcRenderer.send(removeProgram, button.attr('del'));
     // TODO check is deleted for more stability
     button.parent().remove();
   });
-  body.on('click', '.btn.program', e => {
+  body.on('click', cSelector(v_programButton), e => {
     const button = $(e.currentTarget);
     ipcRenderer.send(launchProgram, button.attr('execute'));
   });
@@ -149,7 +151,7 @@ $(document).ready(() => {
     ipcRenderer.send(closeExpandWindow);
   });
   $.contextMenu({
-    selector: ".program-cover",
+    selector: cSelector(v_programCover),
     items: {
       image: {
         name: 'Image',
@@ -157,7 +159,7 @@ $(document).ready(() => {
           remove: {
             name: "Remove",
             callback: (key, opt) => {
-              const button = $(opt.$trigger).children('.btn.program');
+              const button = $(opt.$trigger).children(cSelector(v_programButton));
               const imagePath = button.attr('image');
               // TODO check is deleted for more stability
               ipcRenderer.send(removeImageFromProgram, imagePath);
@@ -183,21 +185,13 @@ $(document).ready(() => {
   });
 });
 
-$('.program-cover').bind("contextmenu", (e) => {
-  // Avoid the real one
-  e.preventDefault();
-  const button = $(e.currentTarget);
-  console.log(button)
-});
-
 ipcRenderer.on(isSteamUserExists, (e, exists) => {
   if (exists) {
-    alertify.confirm('Compact Launcher', 'Steam Found. Do you want to add recent user?', () => {
-        ipcRenderer.send(getUserAnswer, true);
-      }
-      , () => {
-        ipcRenderer.send(getUserAnswer, false);
-      }).set({labels: {ok: 'Yes', cancel: 'No'}});
+    alertify.confirm(programName, 'Steam Found. Do you want to add recent user?', () => {
+      ipcRenderer.send(getUserAnswer, true);
+    }, () => {
+      ipcRenderer.send(getUserAnswer, false);
+    }).set({labels: {ok: 'Yes', cancel: 'No'}});
   }
 });
 
@@ -209,9 +203,9 @@ const renderPrograms = async (programs) => {
 
 const generateList = (list, inner = false) => {
   let programListCover = $('<li key="' + list.name + '">' +
-    '<button class="btn list dropdown-button">' + list.name + '</button>' +
+    '<button class="' + v_dropdownButton + '">' + list.name + '</button>' +
     '</li>');
-  let programList = $('<ul class="dropdown-list"></ul>');
+  let programList = $('<ul class=' + v_dropdownList + '></ul>');
   if (inner) {
     programList.addClass('inner');
   }
@@ -234,11 +228,11 @@ const generateList = (list, inner = false) => {
 
 const renderButton = (value) => {
   if (value.hasOwnProperty('file')) {
-    return '<li class="program-cover">' +
-      '<button class="btn program col-sm-11" image="' + value.image + '" execute="' + value.exePath + '">' +
+    return '<li class="' + v_programCover + '">' +
+      '<button class="' + v_programButton + ' col-sm-11" image="' + value.image + '" execute="' + value.exePath + '">' +
       '<p class="float-left">' + value.name + '</p> ' +
       '</button>' +
-      '<button  class="btn col-sm-1 delete-program float-right" del="' + value.exePath + '">X</button>' +
+      '<button  class="' + v_deleteProgramButton + ' col-sm-1  float-right" del="' + value.exePath + '">X</button>' +
       '</li>';
   }
 };

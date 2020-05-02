@@ -27,17 +27,20 @@ class ActiveWindowTracker {
   start(callback, interval = 1000) {
     setInterval(() => {
       activeWin().then(response => {
-        if (this.forbiddenApps.indexOf(response.owner.name) >= 0) {
-          callback(true);
-        } else {
-          callback(false);
+        if(response.owner != null){
+          if (this.forbiddenApps.indexOf(response.owner.name) >= 0) {
+            callback(true);
+          } else {
+            callback(false);
+          }
+          if ((response.owner.name !== "Compact Launcher.exe" && response.owner.name !== 'electron.exe') && this.activeProgram !== response.owner.name) {
+            this.activeProgram = response.owner.name;
+            console.log(this.activeProgram)
+          }
         }
-        if ((response.owner.name !== "Compact Launcher.exe" && response.owner.name !== 'electron.exe') && this.activeProgram !== response.owner.name) {
-          this.activeProgram = response.owner.name;
-          console.log(this.activeProgram)
-        }
+
       })
-    }, 1000)
+    }, interval)
   }
 
   addProgram() {
