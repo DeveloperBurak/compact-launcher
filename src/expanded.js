@@ -102,16 +102,23 @@ $(document).ready(() => {
   body.on('mouseenter', cSelector(v_programCover), e => {
     const cover = $(e.currentTarget);
     const button = cover.children(cSelector(v_programButton));
+    programPreviewContainer.removeClass('appearing');
     programPreviewContainer.children('img').attr('src', button.attr('image'));
     if (button.attr('image') != null) {
       programPreviewContainer.removeClass('d-none');
+      programPreviewContainer.addClass('appearing');
     } else {
       programPreviewContainer.addClass('d-none');
     }
     cover.children(cSelector(v_deleteProgramButton)).show();
   }).on('mouseleave', cSelector(v_programCover), e => {
     const cover = $(e.currentTarget);
+    programPreviewContainer.removeClass('appearing');
     cover.children(cSelector(v_deleteProgramButton)).hide();
+  });
+
+  programPreviewContainer.on('webkitAnimationEnd animationend', () => {
+    programPreviewContainer.removeClass('appearing');
   });
 
   body.on('click', cSelector(v_deleteProgramButton), (e) => {

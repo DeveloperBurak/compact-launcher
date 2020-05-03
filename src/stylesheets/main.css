@@ -56,3 +56,20 @@ a {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.appearing {
+  -webkit-animation: appearing 0.5s linear 1;
+  -moz-animation: appearing 0.5s linear 1;
+  -o-animation: appearing 0.5s linear 1;
+  animation: appearing 0.5s linear 1;
+}
+
+@-webkit-keyframes appearing /* Safari and Chrome */
+{
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
