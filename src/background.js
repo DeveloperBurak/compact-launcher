@@ -55,7 +55,9 @@ app.on("ready", () => {
   openCollapsedWindow();
   File.createRequiredFolders();
   setAutoLaunch();
-  setTray();
+  if (process.platform !== 'linux') {
+    setTray();
+  }
   ActiveWindowTracker.start((isForbidden) => {
     BrowserWindow.getAllWindows().filter(window => {
       window.setAlwaysOnTop(!isForbidden);
@@ -163,9 +165,11 @@ const openExpandedScene = (data) => {
     expandedScene.show();
     expandedScene.webContents.send(renderItem, data);
     Steam.getUser().then(user => {
-      if (user.account !== false) {
+      if (user != null && user.account !== false) {
         expandedScene.webContents.send(getSteamUser, user);
       }
+    }).catch(message =>{
+      console.log(message);
     });
     mainWindow.close();
   });
