@@ -11,7 +11,7 @@ import {
   getUserAnswer,
   isSteamExists,
   isSteamUserExists,
-  launchProgram,
+  launchProgram, openSettingWindow, openToolsWindow,
   removeImageFromProgram,
   removeProgram,
   removeProgramCache,
@@ -244,3 +244,11 @@ const renderButton = (value) => {
       '</li>';
   }
 };
+
+$('#btn-openSettingsWindow').on('click', function () {
+  ipcRenderer.send(openSettingWindow);
+});
+
+$('#btn-openToolsWindow').on('click',function () {
+  ipcRenderer.send(openToolsWindow);
+});

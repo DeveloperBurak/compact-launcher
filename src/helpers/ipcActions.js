@@ -16,3 +16,9 @@ export const addImageFromProgram = 'program:add:image';
 
 export const expandWindow = 'window:expand';
 export const closeExpandWindow = 'window:close:expanded';
+export const openSettingWindow = 'window:open:settings';
+export const openToolsWindow = 'window:open:tools';
+export const openSubWindow = 'window:open:subWindow'; // TODO continue this
+
+export const systemLog = 'console:log';
+

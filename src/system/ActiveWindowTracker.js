@@ -33,7 +33,7 @@ class ActiveWindowTracker {
           } else {
             callback(false);
           }
-          if ((response.owner.name !== "Compact Launcher.exe" && response.owner.name !== 'electron.exe') && this.activeProgram !== response.owner.name) {
+          if ((response.owner.name !== "Compact Launcher.exe" && response.owner.name !== 'electron.exe' && response.owner.name !== 'Compact Launcher') && this.activeProgram !== response.owner.name) {
             this.activeProgram = response.owner.name;
             console.log(this.activeProgram)
           }

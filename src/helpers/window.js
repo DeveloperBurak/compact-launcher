@@ -9,29 +9,18 @@ export default (name, options) => {
   let win;
 
   // default assigning
-  if (options.frame == null) {
-    options.frame = false;
-  }
-  if (options.transparent == null) {
-    options.transparent = false;
-  }
-  if (options.useContentSize == null) {
-    options.useContentSize = false;
-  }
-  if (options.alwaysOnTop == null) {
-    options.alwaysOnTop = true;
-  }
-  if (options.skipTaskbar == null) {
-    options.skipTaskbar = true;
-  }
-  if (options.resizable == null) {
-    options.resizable = false;
-  }
+  options.frame = options.frame ?? false;
+  options.transparent = options.transparent ?? false;
+  options.useContentSize = options.useContentSize ?? false;
+  options.alwaysOnTop = options.alwaysOnTop ?? true;
+  options.skipTaskbar = options.skipTaskbar ?? true;
+  options.resizable = options.resizable ?? false;
+  options.show = options.show ?? false;
+  options.webPreferences = {nodeIntegration: true};
+
   if (options.center == null) {
-    if (!(options.x && options.y)) {
-      options.x = 0;
-      options.y = 0;
-    }
+    options.x = options.x ?? 0;
+    options.y = options.y ?? 0;
   }
 
   if (options.width == null && options.height == null) {
@@ -40,13 +29,13 @@ export default (name, options) => {
     options.height = height;
   }
   win = new BrowserWindow(Object.assign({}, options));
-  win.setTitle("Compact Launcher");
+  const additionalTitle = (options.title != null) ? ' - ' + options.title : null;
+  win.setTitle("Compact Launcher" + additionalTitle);
   win.setSize(options.width, options.height);
   if (options.x && options.y) {
     win.setPosition(options.x, options.y);
   }
   win.setAlwaysOnTop(options.alwaysOnTop);
   win.setSkipTaskbar(options.skipTaskbar);
-  win.setResizable(options.resizable);
   return win;
-};
+}

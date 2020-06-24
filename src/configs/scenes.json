@@ -3,20 +3,40 @@
     "width": 15,
     "height": 35,
     "transparent": false,
-    "type": "toolbar",
-    "show": false
+    "type": "toolbar"
   },
   "expandedScreen": {
-    "show": false,
     "transparent": true
   },
   "steamDialogue": {
     "width": 500,
     "height": 500,
     "transparent": true,
-    "show": false,
     "center": true,
     "alwaysOnTop": false,
     "skipTaskbar": false
+  },
+  "settingsScreen": {
+    "center": true,
+    "frame": true,
+    "width": 400,
+    "height": 500,
+    "alwaysOnTop": true,
+    "titleBarStyle": "hidden",
+    "modal": true,
+    "parent": "top",
+    "title": "Settings"
+  },
+
+  "toolsScreen": {
+    "center": true,
+    "frame": true,
+    "width": 400,
+    "height": 500,
+    "alwaysOnTop": true,
+    "titleBarStyle": "hidden",
+    "modal": true,
+    "parent": "top",
+    "title": "Tools"
   }
 }

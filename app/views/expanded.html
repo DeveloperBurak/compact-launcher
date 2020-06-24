@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<!--suppress HtmlRequiredTitleElement -->
+<html lang="en-EN">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="assets/font-awesome/css/fontawesome.min.css"/>
-  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css"/>
-  <link rel="stylesheet" href="assets/jquery-contextmenu/jquery.contextMenu.min.css"/>
+  <link rel="stylesheet" href="../assets/font-awesome/css/fontawesome.min.css"/>
+  <link rel="stylesheet" href="../assets/font-awesome/css/all.min.css"/>
+  <link rel="stylesheet" href="../assets/jquery-contextmenu/jquery.contextMenu.min.css"/>
 </head>
 <body>
 
@@ -20,7 +21,10 @@
           <button class="btn btn-refresh-programs"><i class="fa fa-sync-alt"></i></button>
         </div>
         <div class="col-sm-3 padding-no">
-          <button class="btn btn-tool"><i class="fa fa-tools"></i></button>
+          <button class="btn btn-tool" id="btn-openToolsWindow" data-toggle="tooltip" title="Tools"><i class="fa fa-tools"></i></button>
+        </div>
+        <div class="col-sm-3 padding-no">
+          <button class="btn btn-settings" id="btn-openSettingsWindow" data-toggle="tooltip" title="Settings"><i class="fa fa-cogs"></i></button>
         </div>
       </div>
 
@@ -56,6 +60,6 @@
     </div>
   </div>
 </div>
-<script src="expanded.js"></script>
+<script src="../expanded.js"></script>
 </body>
 </html>

@@ -1,50 +1,45 @@
-import path from "path";
-import url from "url";
-import {app, ipcMain, Menu, Tray} from "electron";
-import createWindow from "./helpers/window";
-import scenes from "./configs/scenes";
-import env from "env";
+import {app, BrowserWindow, ipcMain} from "electron";
 import ProgramHandler from "./system/ProgramHandler";
 import Store from 'electron-store';
-import {trayMenuTemplate} from './menu/tray_menu_template';
 import User from './system/User';
 import File from "./system/File";
 import Steam from "./system/Steam";
-import {BrowserWindow} from "electron";
-
+import env from "env";
 import {
   addImageFromProgram,
   cacheScannedPrograms,
   closeExpandWindow,
   expandWindow,
-  getSteamUser,
   getUserAnswer,
   isSteamExists,
   isSteamUserExists,
   itemsReady,
-  launchProgram, removeImageFromProgram, removeProgram,
+  launchProgram, openSettingWindow, openToolsWindow as ipcOpenToolsWindow,
+  removeImageFromProgram,
+  removeProgram,
   removeProgramCache,
-  renderItem,
-  scanPrograms
+  scanPrograms,
+  systemLog
 } from "./helpers/ipcActions";
-import ActiveWindowTracker from "./system/ActiveWindowTracker";
 import {removeFile} from "./helpers/file";
-import {programName, cacheProgramHTML} from "./configs/app";
+import {cacheProgramHTML} from "./configs/app";
 import Program from "./system/Program";
+import {openCollapsedWindow, openExpandedScene, openSettingsWindow,openToolsWindow} from "./system/WindowHandler";
+import {setAutoLaunch, setTray, startProgramTracking} from "./system/System";
 
-const AutoLaunch = require('auto-launch');
 const store = new Store();
 
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');
   app.commandLine.appendSwitch('disable-gpu');
 }
-
 // windows
 let mainWindow = null;
 let expandedScene = null;
+let settingsWindow = null;
+let toolsWindow = null;
 
-let tray = null;
+let tray;
 
 const version = Number.parseFloat(app.getVersion());
 if (version !== store.get('app.version') || version < 0.4) {
@@ -52,34 +47,34 @@ if (version !== store.get('app.version') || version < 0.4) {
 }
 
 app.on("ready", () => {
-  openCollapsedWindow();
+  mainWindow = openCollapsedWindow();
   File.createRequiredFolders();
-  setAutoLaunch();
-  if (process.platform !== 'linux') {
-    setTray();
+  if (env.name !== 'development') setAutoLaunch();
+  try { // it may throw exception on linux
+    tray = setTray();
+  } catch (e) {
+    console.log(e)
   }
-  ActiveWindowTracker.start((isForbidden) => {
-    BrowserWindow.getAllWindows().filter(window => {
-      window.setAlwaysOnTop(!isForbidden);
-    })
-  });
+  startProgramTracking();
 });
 
 
 ipcMain.on(scanPrograms, async () => {
   const cacheHTML = store.get(cacheProgramHTML);
-  if (cacheHTML != null) {
-    mainWindow.webContents.send(itemsReady, {cache: cacheHTML});
-  } else {
+  (cacheHTML != null) ?
+    mainWindow.webContents.send(itemsReady, {cache: cacheHTML}) :
     await ProgramHandler.readShortcutFolder().then(items => {
-      mainWindow.webContents.send(itemsReady, items);
+      if(mainWindow !== null) mainWindow.webContents.send(itemsReady, items);
     });
-  }
 });
 
 ipcMain.on(cacheScannedPrograms, (err, cache) => {
-  store.set('app.version', version);
+  store.set('app.version', version); // TODO dont set this in there.
   store.set(cacheProgramHTML, cache.html);
+});
+
+ipcMain.on(systemLog, (err, value) => {
+  console.log(value)
 });
 
 ipcMain.on(removeProgramCache, () => {
@@ -87,12 +82,11 @@ ipcMain.on(removeProgramCache, () => {
 });
 
 ipcMain.on(expandWindow, (err, data) => {
-  openExpandedScene(data);
+  expandedScene = openExpandedScene(data);
 });
 
 ipcMain.on(closeExpandWindow, async () => {
-  await openCollapsedWindow();
-  expandedScene.close();
+  mainWindow = openCollapsedWindow();
 });
 
 ipcMain.on(launchProgram, (err, file) => {
@@ -130,69 +124,11 @@ ipcMain.on(isSteamExists, () => {
   });
 });
 
-const openCollapsedWindow = () => {
-  mainWindow = createWindow("collapsed", scenes.collapsedScreen);
-  mainWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, "collapsed.html"),
-      protocol: "file:",
-      slashes: true
-    })
-  );
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
-  });
-  if (env.name === "development") {
-    // mainWindow.openDevTools();
-  }
-};
+ipcMain.on(openSettingWindow, () => {
+  settingsWindow = openSettingsWindow();
+})
 
+ipcMain.on(ipcOpenToolsWindow, () => {
+  toolsWindow = openToolsWindow();
+})
 
-const openExpandedScene = (data) => {
-  expandedScene = createWindow("expanded", scenes.expandedScreen);
-  expandedScene.loadURL(
-    url.format({
-      pathname: path.join(__dirname, "expanded.html"),
-      protocol: "file:",
-      slashes: true
-    })
-  );
-  if (env.name === "development") {
-    expandedScene.openDevTools();
-  }
-
-  expandedScene.on('ready-to-show', () => {
-    expandedScene.show();
-    expandedScene.webContents.send(renderItem, data);
-    Steam.getUser().then(user => {
-      if (user != null && user.account !== false) {
-        expandedScene.webContents.send(getSteamUser, user);
-      }
-    }).catch(message =>{
-      console.log(message);
-    });
-    mainWindow.close();
-  });
-};
-
-const setTray = () => {
-  tray = new Tray(path.join(__dirname, 'assets/images/core/tray.ico'));
-  const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
-  tray.setToolTip(programName);
-  tray.setContextMenu(contextMenu);
-};
-
-const setAutoLaunch = (enabled = true) => {
-  let autoLaunch = new AutoLaunch({
-    name: programName,
-    path: app.getPath('exe'),
-  });
-
-  autoLaunch.isEnabled().then((isEnabled) => {
-    if (enabled) {
-      if (!isEnabled) autoLaunch.enable();
-    } else {
-      autoLaunch.disable();
-    }
-  });
-};

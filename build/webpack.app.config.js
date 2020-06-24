@@ -8,6 +8,8 @@ module.exports = env => {
       background: "./src/background.js",
       app: "./src/app.js",
       expanded: "./src/expanded.js",
+      settings: "./src/settings.js",
+      tools: "./src/tools.js",
     },
     output: {
       filename: "[name].js",
