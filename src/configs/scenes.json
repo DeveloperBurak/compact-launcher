@@ -24,8 +24,8 @@
     "alwaysOnTop": true,
     "titleBarStyle": "hidden",
     "modal": true,
-    "parent": "top",
-    "title": "Settings"
+    "title": "Settings",
+    "skipTaskbar": false
   },
 
   "toolsScreen": {
@@ -37,6 +37,7 @@
     "titleBarStyle": "hidden",
     "modal": true,
     "parent": "top",
-    "title": "Tools"
+    "title": "Tools",
+    "skipTaskbar": false
   }
 }

@@ -57,7 +57,6 @@ class Steam {
                 resolve(JSON.parse(data.toString('utf8')));
               }catch (e) {
                 fs.unlink(steamUserFile,() =>{
-                  console.log('deleted');
                   this.getUser();
                 });
                 reject(e.getMessage);
@@ -112,9 +111,7 @@ class Steam {
           };
           resolve(userObject);
         }
-
       }).then(userObject => {
-        console.log(userObject);
         if (typeof callback !== "undefined") {
           callback(userObject);
         }

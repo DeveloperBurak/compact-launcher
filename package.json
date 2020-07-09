@@ -2,13 +2,22 @@
   "name": "compact-launcher",
   "productName": "Compact Launcher",
   "description": "Compact Launcher for Your Programs",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "author": "Burak Eren Karasu <developerburakeren@gmail.com>",
   "copyright": "PPROGA",
   "main": "app/background.js",
   "build": {
     "appId": "com.burak.compact-launcher",
+    "productName": "Compact Launcher",
+    "linux": {
+      "category": "Utils",
+      "packageCategory": "utils",
+      "target": [
+        "deb",
+        "snap"
+      ]
+    },
     "files": [
       "app/**/*",
       "node_modules/**/*",
@@ -16,8 +25,7 @@
     ],
     "directories": {
       "buildResources": "resources"
-    },
-    "publish": null
+    }
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
@@ -27,7 +35,7 @@
     "e2e": "mocha temp/e2e.js --require source-map-support/register",
     "test": "npm run unit && npm run e2e",
     "start": "node build/start.js",
-    "release": "npm test && webpack --config=build/webpack.app.config.js --env=production && electron-builder"
+    "release": "webpack --config=build/webpack.app.config.js --env=production && electron-builder"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
@@ -53,9 +61,11 @@
     "css-loader": "^3.1.0",
     "electron": "^8.3.1",
     "electron-builder": "^22.7.0",
+    "electron-installer-snap": "^5.1.0",
     "electron-mocha": "^8.1.1",
     "electron-rebuild": "^1.10.1",
     "friendly-errors-webpack-plugin": "^1.7.0",
+    "jquery-circle-progress": "^1.2.2",
     "mocha": "^6.2.0",
     "source-map-support": "^0.5.6",
     "spectron": "^6.0.0",

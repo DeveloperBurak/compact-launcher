@@ -22,3 +22,13 @@ export const openSubWindow = 'window:open:subWindow'; // TODO continue this
 
 export const systemLog = 'console:log';
 
+export const ipcSetAutoLaunch = 'system:setAutoLaunch';
+export const ipcSetAlwaysOnTop = 'system:setAlwaysOnTop';
+export const ipcGetSetting = 'system:getSetting';
+export const ipcGetSettingReady = 'system:getSetting:ready';
+
+export const ipcTimerStarted = 'tools:timer:started';
+export const ipcTimerFinished = 'tools:timer:finished';
+export const ipcTimerStopped = 'tools:timer:stopped';
+export const ipcTimerRequestTime = 'tools:timer:request:time'; // send a request from client
+export const ipcTimerRemainingTime = 'tools:timer:time';

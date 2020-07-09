@@ -35,19 +35,24 @@ const programListCover = $('#program-list');
 
 let appUser;
 
-if (env.name === 'development') {
+/*if (env.name === 'development') {
   programPreviewContainer.on("click", e => {
     ipcRenderer.send(closeExpandWindow);
   });
-} else {
+} else {*/
+  let closingTimeOut = null;
   programListCover.on("mouseleave", e => {
-    if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
-      programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
-        ipcRenderer.send(closeExpandWindow);
-      });
-    }
+    closingTimeOut = setTimeout(() => {
+      if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
+        programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
+          ipcRenderer.send(closeExpandWindow);
+        });
+      }
+    }, 350);
+  }).on("mouseenter", e => {
+    clearTimeout(closingTimeOut);
   });
-}
+// }
 
 
 ipcRenderer.on('window:close:expand', () => {
@@ -249,6 +254,6 @@ $('#btn-openSettingsWindow').on('click', function () {
   ipcRenderer.send(openSettingWindow);
 });
 
-$('#btn-openToolsWindow').on('click',function () {
+$('#btn-openToolsWindow').on('click', function () {
   ipcRenderer.send(openToolsWindow);
 });

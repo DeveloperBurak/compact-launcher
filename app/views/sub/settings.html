@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <!--suppress HtmlRequiredTitleElement -->
 <html lang="en-EN">
+
 <head>
   <meta charset="utf-8"/>
-<!--  <link rel="stylesheet" href="assets/font-awesome/css/fontawesome.min.css"/>-->
-<!--  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css"/>-->
+  <!--  <link rel="stylesheet" href="assets/font-awesome/css/fontawesome.min.css"/>-->
+  <!--  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css"/>-->
 </head>
 
 <body>
@@ -24,25 +25,30 @@
       </ul>
       <div class="development">
         <ul>
-          <li>Theme: </li>
+          <li>Theme:</li>
         </ul>
       </div>
     </div>
     <div class="tab-pane fade" id="system" role="tabpanel" aria-labelledby="system-tab">
-      <ul>
-        <li>Coming Soon...</li>
+      <ul class="setting-container">
+        <li>
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="autoLaunch">
+            <label class="custom-control-label" for="autoLaunch">Auto Launch</label>
+          </div>
+        </li>
+        <li>
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="alwaysOnTop">
+            <label class="custom-control-label" for="alwaysOnTop">Always On Top</label>
+          </div>
+        </li>
       </ul>
-      <div class="development">
-        <ul>
-          <li>AutoLaunch: </li>
-          <li>TrayIcon: </li>
-          <li>AlwaysOnTop: </li>
-        </ul>
-      </div>
     </div>
   </div>
 </div>
 
 <script src="../../settings.js"></script>
 </body>
+
 </html>

@@ -4,12 +4,17 @@ import {ipcRenderer} from "electron";
 import {systemLog} from "./helpers/ipcActions";
 
 const expandButton = document.getElementById('expandButton');
+let openingTimeout = null;
 expandButton.addEventListener("mouseenter", e => {
-  const icon = document.getElementById('rocket');
-  icon.classList.add('launch');
-  ipcRenderer.send("system:scan:programs");
-}, {once: true});
-
+  openingTimeout = setTimeout(() => {
+    const icon = document.getElementById('rocket');
+    icon.classList.add('launch');
+    ipcRenderer.send("system:scan:programs");
+  },500)
+});
+expandButton.addEventListener("mouseleave", e => {
+  clearTimeout(openingTimeout);
+});
 ipcRenderer.on('items:ready', (err, items) => {
   ipcRenderer.send('window:expand', items);
 });

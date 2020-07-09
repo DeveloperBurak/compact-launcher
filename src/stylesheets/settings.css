@@ -1,15 +1,30 @@
 .btn-tab {
-  color:#ddd !important;
-  background-color:#2f2f2f !important;
+  color: #ddd !important;
+  background-color: #2f2f2f !important;
   margin: 0 5px;
 }
-.btn-tab:first-child{
+
+.btn-tab:first-child {
   margin-left: 0;
 }
-.btn-tab:first-child{
+
+.btn-tab:first-child {
   margin-right: 0;
 }
 
-.btn-tab.active{
+.btn-tab.active {
   background-color: darkcyan !important;
+}
+
+.setting-container {
+  display: flex;
+  list-style: none;
+  padding: 10px 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.setting-container > li {
+  width: 50%;
+  margin: 10px 0;
 }

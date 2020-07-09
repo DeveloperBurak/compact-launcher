@@ -1,35 +1,70 @@
 <!DOCTYPE html>
-<!--suppress HtmlRequiredTitleElement -->
+<!--suppress ALL -->
 <html lang="en-EN">
 <head>
   <meta charset="utf-8"/>
-  <!--  <link rel="stylesheet" href="assets/font-awesome/css/fontawesome.min.css"/>-->
-  <!--  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css"/>-->
+  <style>
+
+    #timer {
+      padding: 20px 35px;
+    }
+
+    #timer-text {
+      left: 50%;
+      top: 50%;
+      position: absolute;
+      transform: translate(-50%, -50%);
+    }
+
+    #circle {
+      width: fit-content;
+      height: fit-content;
+      position: relative;
+    }
+  </style>
 </head>
 
 <body>
 <div class="d-flex w-100 h-100 flex-column">
   <ul class="nav justify-content-between" id="toolTab">
     <li class="nav-item w-50">
-      <a class="nav-link active btn-tab" href="#systemTimer">System Timer</a>
+      <a class="nav-link active btn-tab" href="#systemTimer">Sleep/ShutDown Timer</a>
     </li>
     <li class="nav-item w-50">
       <a class="nav-link btn-tab" href="#pictureSorter">Picture Sorter</a>
     </li>
   </ul>
   <div class="tab-content" id="tabContent">
-    <div class="tab-pane fade show active" id="pictureSorter" role="tabpanel" aria-labelledby="pictureSorter-tab">
-      <strong>We are developing...</strong>
+    <div class="tab-pane fade" id="systemTimer" role="tabpanel" aria-labelledby="systemTimer-tab">
       <div class="development">
-        <!-- TODO get this from my already coded program-->
+        <div id="timer">
+          <div class="form-group">
+            <input placeholder="Time" name="time" id="time" class="form-control">
+          </div>
+          <div class="form-group">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="time-length" id="time-length-second" value="second">
+              <label class="form-check-label" for="time-length-second"> Second </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="time-length" id="time-length-minute" value="minute">
+              <label class="form-check-label" for="time-length-minute"> Minute </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="time-length" id="time-length-hour" value="hour">
+              <label class="form-check-label" for="time-length-hour"> Hour </label>
+            </div>
+          </div>
+          <button id="start-timer">Start</button>
+          <button id="stop-timer" style="display: none">Stop</button>
+          <div id="circle">
+            <p id="timer-text"></p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="tab-pane fade" id="systemTimer" role="tabpanel" aria-labelledby="systemTimer-tab">
+    <div class="tab-pane fade show active" id="pictureSorter" role="tabpanel" aria-labelledby="pictureSorter-tab">
       <strong>We are developing...</strong>
-
-      <div class="development">
-
-      </div>
     </div>
   </div>
 </div>

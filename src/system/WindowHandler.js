@@ -2,15 +2,18 @@ import createWindow from "../helpers/window";
 import scenes from "../configs/scenes.json";
 import url from "url";
 import path from "path";
-import {getSteamUser, renderItem} from "../helpers/ipcActions";
+import {getSteamUser, ipcSetAlwaysOnTop, ipcTimerStarted, renderItem} from "../helpers/ipcActions";
 import Steam from "./Steam";
+import {ipcMain} from "electron";
+import {BrowserWindow} from "electron";
 
 // these connects windows each other.
 let mainWindow = null;
 let settingsWindow = null;
-let expandedScene = null;
+let expandedWindow = null;
 let toolsWindow = null;
 
+let timeLimit = 0; // shut or sleep system timer
 
 export const openCollapsedWindow = () => {
   mainWindow = createWindow("collapsed", scenes.collapsedScreen);
@@ -18,12 +21,12 @@ export const openCollapsedWindow = () => {
     url.format({
       pathname: path.join(__dirname, "views/collapsed.html"),
       protocol: "file:",
-      slashes: true
+      slashes: true,
     })
   );
-  mainWindow.on('ready-to-show', () => {
-    if (expandedScene != null) expandedScene.close();
+  mainWindow.on("ready-to-show", () => {
     mainWindow.show();
+    if (expandedWindow != null) expandedWindow.close();
   });
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -32,83 +35,92 @@ export const openCollapsedWindow = () => {
 };
 
 export const openExpandedScene = (data) => {
-  expandedScene = createWindow("expanded", scenes.expandedScreen);
-  expandedScene.loadURL(
+  expandedWindow = createWindow("expanded", scenes.expandedScreen);
+  expandedWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, "views/expanded.html"),
       protocol: "file:",
-      slashes: true
+      slashes: true,
     })
   );
 
-  expandedScene.on('ready-to-show', () => {
-    expandedScene.show();
-    expandedScene.webContents.send(renderItem, data);
-    Steam.getUser().then(user => {
+  expandedWindow.on("ready-to-show", () => {
+    expandedWindow.show();
+    expandedWindow.webContents.send(renderItem, data);
+    Steam.getUser().then((user) => {
       if (user != null && user.account !== false) {
-        expandedScene.webContents.send(getSteamUser, user);
+        expandedWindow.webContents.send(getSteamUser, user);
       }
-    }).catch(message => {
+    }).catch((message) => {
       console.log(message);
     });
     mainWindow.close();
   });
-  expandedScene.on('closed', () => {
-    if (settingsWindow != null) settingsWindow.close();
-    if (toolsWindow != null) toolsWindow.close();
-    expandedScene = null;
-  })
-  return expandedScene;
+  expandedWindow.on("closed", () => {
+    expandedWindow = null;
+    if (mainWindow != null && settingsWindow == null && toolsWindow == null) {
+      mainWindow.show();
+    }
+  });
+  return expandedWindow;
 };
 
 // TODO make a system about sub window.
 
 export const openSettingsWindow = () => {
-  if (settingsWindow === null) {
+  if (settingsWindow == null) {
+    // scenes.settingsScreen.parent = mainWindow ?? expandedWindow;
     settingsWindow = createWindow("subSettings", scenes.settingsScreen);
     settingsWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, "views/sub/settings.html"),
         protocol: "file:",
-        slashes: true
+        slashes: true,
       })
     );
     settingsWindow.setMenu(null);
-    settingsWindow.on('ready-to-show', () => {
-      expandedScene.hide();
+    settingsWindow.on("ready-to-show", () => {
       settingsWindow.show();
-    });
-    settingsWindow.on('closed', () => {
-      expandedScene.show();
+    }).on("closed", () => {
       settingsWindow = null;
     });
-    // settingsWindow.openDevTools();
   }
-
   return settingsWindow;
 };
 
 export const openToolsWindow = () => {
   if (toolsWindow === null) {
-    toolsWindow = createWindow("subTools", scenes.settingsScreen);
+    toolsWindow = createWindow("subTools", scenes.toolsScreen);
     toolsWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, "views/sub/tools.html"),
         protocol: "file:",
-        slashes: true
+        slashes: true,
       })
     );
     toolsWindow.setMenu(null);
-    toolsWindow.on('ready-to-show', () => {
-      expandedScene.hide();
+    toolsWindow.on("ready-to-show", () => {
       toolsWindow.show();
-    });
-    toolsWindow.on('closed', () => {
-      expandedScene.show();
+    }).on("closed", () => {
       toolsWindow = null;
     });
     toolsWindow.openDevTools();
   }
-
   return toolsWindow;
 };
+
+ipcMain.on(ipcSetAlwaysOnTop, (err, enabled) => {
+  if (mainWindow != null)
+    mainWindow.setAlwaysOnTop(enabled);
+  if (expandedWindow != null)
+    expandedWindow.setAlwaysOnTop(enabled);
+  if (toolsWindow != null)
+    toolsWindow.setAlwaysOnTop(enabled);
+  if (settingsWindow != null)
+    settingsWindow.setAlwaysOnTop(enabled);
+});
+
+ipcMain.on(ipcTimerStarted, (err, time) => {
+  timeLimit = time;
+});
+

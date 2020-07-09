@@ -11,6 +11,7 @@ class ActiveWindowTracker {
     this.forbiddenApps = [];
     this.activeProgram = null;
     this.forbiddenProgramsFile = path.join(File.get('userdata'), 'forbidden-programs.json');
+    this.tracking = null;
     fileExists(this.forbiddenProgramsFile).then(result => {
       if (!result) {
         this.forbiddenApps = ["chrome.exe", "steam.exe"];
@@ -21,13 +22,12 @@ class ActiveWindowTracker {
         });
       }
     });
-
   }
 
   start(callback, interval = 1000) {
-    setInterval(() => {
+    this.tracking = setInterval(() => {
       activeWin().then(response => {
-        if(response != null){
+        if (response != null) {
           if (this.forbiddenApps.indexOf(response.owner.name) >= 0) {
             callback(true);
           } else {
@@ -40,7 +40,11 @@ class ActiveWindowTracker {
         }
 
       })
-    }, interval)
+    }, interval);
+  }
+
+  stop() {
+    if (this.tracking != null) clearInterval(this.tracking);
   }
 
   addProgram() {
@@ -63,7 +67,7 @@ class ActiveWindowTracker {
     });
   }
 
-  listForbiddenProgramsFromFile(){
+  listForbiddenProgramsFromFile() {
     return new Promise((resolve, reject) => {
       fs.readFile(this.forbiddenProgramsFile, (err, data) => {
         resolve(JSON.parse(data.toString('utf8')));
