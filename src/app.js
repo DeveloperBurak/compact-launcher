@@ -1,3 +1,4 @@
+import "./system-wide";
 import "./stylesheets/main.css";
 import "./stylesheets/collapsed.css";
 import {ipcRenderer} from "electron";

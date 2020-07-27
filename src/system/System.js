@@ -6,6 +6,7 @@ import ActiveWindowTracker from "./ActiveWindowTracker";
 import {settingAutoLaunch} from "../helpers/settingKeys";
 import File from "./File";
 import {fileExists} from "../helpers/file";
+import execute from "../helpers/execute";
 
 const fs = require("fs");
 const AutoLaunch = require("auto-launch");
@@ -92,3 +93,74 @@ export const getSetting = (name) => {
     });
   });
 };
+
+
+export const shutdownPC = () => {
+  switch (process.platform) {
+    case 'win32':
+      console.log("win close")
+      break;
+    case 'darwin':
+      // TODO
+      console.log("macos close")
+      break;
+    case 'linux':
+      execute("shutdown", (message) => {
+        console.log(message)
+      });
+      break;
+    default:
+      throw new Error("Invalid OS");
+  }
+}
+export const cancelShutDown = () => {
+  switch (process.platform) {
+    case 'win32':
+      console.log("win close")
+      break;
+    case 'darwin':
+      // TODO
+      console.log("macos close")
+      break;
+    case 'linux':
+      execute("shutdown -c", (message) => {
+        console.log(message)
+      });
+      break;
+    default:
+      throw new Error("Invalid OS");
+  }
+}
+
+export const sleepPC = () => {
+  switch (process.platform) {
+    case 'win32':
+      console.log("win sleep")
+      break;
+    case 'darwin':
+      // TODO
+      console.log("macos sleep")
+      break;
+    case 'linux':
+      execute("systemctl suspend");
+      break;
+    default:
+      throw new Error("Invalid OS");
+  }
+}
+export const lockPC = () => {
+  switch (process.platform) {
+    case 'win32':
+      console.log("win lock")
+      break;
+    case 'darwin':
+      // TODO
+      console.log("macos lock")
+      break;
+    case 'linux':
+      execute("gnome-screensaver-command --lock");
+      break;
+    default:
+      throw new Error("Invalid OS");
+  }
+}

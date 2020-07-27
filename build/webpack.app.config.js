@@ -10,6 +10,7 @@ module.exports = env => {
       expanded: "./src/expanded.js",
       settings: "./src/settings.js",
       tools: "./src/tools.js",
+      systemWide: "./src/system-wide.js",
     },
     output: {
       filename: "[name].js",

@@ -26,8 +26,11 @@ export const ipcSetAutoLaunch = 'system:setAutoLaunch';
 export const ipcSetAlwaysOnTop = 'system:setAlwaysOnTop';
 export const ipcGetSetting = 'system:getSetting';
 export const ipcGetSettingReady = 'system:getSetting:ready';
+export const ipcDisableShutdown = 'system:shutdown:disable';
+export const ipcNotificationReceived = 'system:notification:received';
 
 export const ipcTimerStarted = 'tools:timer:started';
+export const ipcTimerSetTime = 'tools:timer:set:time';
 export const ipcTimerFinished = 'tools:timer:finished';
 export const ipcTimerStopped = 'tools:timer:stopped';
 export const ipcTimerRequestTime = 'tools:timer:request:time'; // send a request from client

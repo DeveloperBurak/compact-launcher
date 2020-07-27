@@ -4,27 +4,46 @@
 <head>
   <meta charset="utf-8"/>
   <style>
-
     #timer {
-      padding: 20px 35px;
+      padding: 10px 15px;
+    }
+
+    #time-actions {
+      display: flex;
+      justify-content: space-around;
     }
 
     #timer-text {
-      left: 50%;
-      top: 50%;
       position: absolute;
       transform: translate(-50%, -50%);
+      color: darkcyan;
+      left: 50%;
+      top: 50%;
+      font-weight: 900;
+      text-align: center;
     }
 
-    #circle {
-      width: fit-content;
-      height: fit-content;
+    #line {
+      margin-top: 15px;
       position: relative;
+    }
+
+    .select {
+      border-radius: 5px;
+      min-height: 35px;
+      padding: 5px 10px;
+      background: #eeeeee;
+      color: darkcyan;
+      font-weight: 600;
+    }
+
+    .select option {
+      color: darkcyan !important;
     }
   </style>
 </head>
 
-<body>
+<body class="sub-window">
 <div class="d-flex w-100 h-100 flex-column">
   <ul class="nav justify-content-between" id="toolTab">
     <li class="nav-item w-50">
@@ -35,35 +54,69 @@
     </li>
   </ul>
   <div class="tab-content" id="tabContent">
-    <div class="tab-pane fade" id="systemTimer" role="tabpanel" aria-labelledby="systemTimer-tab">
+    <div class="tab-pane fade show active" id="systemTimer" role="tabpanel" aria-labelledby="systemTimer-tab">
       <div class="development">
         <div id="timer">
+          <div class="d-flex align-items-center">
+            <div class="form-group col-sm-6">
+              <span class="input-number-decrement">–</span>
+              <input class="input-number" name="time" id="time" placeholder="Time" type="text" value="1" min="0" max="60">
+              <span class="input-number-increment">+</span>
+            </div>
+            <div class="form-group radio-buttons no-select col-sm-6" id="times">
+              <div class="form-check form-check-inline col-sm-3">
+                <input class="form-check-input" type="radio" name="time-length" id="time-length-second" value="second">
+                <label class="form-check-label" for="time-length-second"> Second </label>
+                <div class="check">
+                  <div class="inside"></div>
+                </div>
+              </div>
+              <div class="form-check form-check-inline col-sm-3">
+                <input class="form-check-input" type="radio" name="time-length" id="time-length-minute" value="minute">
+                <label class="form-check-label" for="time-length-minute"> Minute </label>
+                <div class="check">
+                  <div class="inside"></div>
+                </div>
+              </div>
+              <div class="form-check form-check-inline col-sm-3">
+                <input class="form-check-input" type="radio" name="time-length" id="time-length-hour" value="hour">
+                <label class="form-check-label" for="time-length-hour"> Hour </label>
+                <div class="check">
+                  <div class="inside"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
           <div class="form-group">
-            <input placeholder="Time" name="time" id="time" class="form-control">
+            <select class="select w-100" name="action" id="action">
+              <option value="" disabled selected>Select Action When Time is Up</option>
+              <option value="shutdown">Shutdown PC</option>
+              <option value="sleep">Sleep PC</option>
+              <option value="lock">Lock PC</option>
+            </select>
           </div>
           <div class="form-group">
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="time-length" id="time-length-second" value="second">
-              <label class="form-check-label" for="time-length-second"> Second </label>
+            <div class="d-none justify-content-around" id="time-actions">
+              <button id="add-time" class="btn btn-success col-log-3">Add Time</button>
+              <button id="reduce-time" value="reduce" class="btn btn-warning col-log-3">Reduce Time</button>
+              <button id="stop-timer" style="display: none" class="btn btn-danger col-log-3">Stop Timer</button>
             </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="time-length" id="time-length-minute" value="minute">
-              <label class="form-check-label" for="time-length-minute"> Minute </label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="time-length" id="time-length-hour" value="hour">
-              <label class="form-check-label" for="time-length-hour"> Hour </label>
-            </div>
+            <button id="start-timer" class="btn default w-100">Start</button>
+            <button id="disable-shutdown" class="btn default w-100 d-none">Disable Shutdown</button>
           </div>
-          <button id="start-timer">Start</button>
-          <button id="stop-timer" style="display: none">Stop</button>
-          <div id="circle">
+
+          <!--<div id="circle">
+            <p id="timer-text"></p>
+          </div>-->
+          <div id="line">
             <p id="timer-text"></p>
           </div>
         </div>
       </div>
     </div>
-    <div class="tab-pane fade show active" id="pictureSorter" role="tabpanel" aria-labelledby="pictureSorter-tab">
+    <div class="tab-pane fade" id="pictureSorter" role="tabpanel" aria-labelledby="pictureSorter-tab">
       <strong>We are developing...</strong>
     </div>
   </div>

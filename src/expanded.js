@@ -1,7 +1,7 @@
+import "./system-wide";
 import "./stylesheets/main.css";
 import "./stylesheets/expanded.css";
 import {ipcRenderer} from "electron";
-import env from "env";
 import $ from "jquery";
 import {
   addImageFromProgram,
@@ -11,7 +11,9 @@ import {
   getUserAnswer,
   isSteamExists,
   isSteamUserExists,
-  launchProgram, openSettingWindow, openToolsWindow,
+  launchProgram,
+  openSettingWindow,
+  openToolsWindow,
   removeImageFromProgram,
   removeProgram,
   removeProgramCache,
@@ -40,18 +42,18 @@ let appUser;
     ipcRenderer.send(closeExpandWindow);
   });
 } else {*/
-  let closingTimeOut = null;
-  programListCover.on("mouseleave", e => {
-    closingTimeOut = setTimeout(() => {
-      if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
-        programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
-          ipcRenderer.send(closeExpandWindow);
-        });
-      }
-    }, 350);
-  }).on("mouseenter", e => {
-    clearTimeout(closingTimeOut);
-  });
+let closingTimeOut = null;
+programListCover.on("mouseleave", e => {
+  closingTimeOut = setTimeout(() => {
+    if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
+      programListCover.animate({"margin-left": '-' + expandedScene.width() + 'px'}, 1000, () => {
+        ipcRenderer.send(closeExpandWindow);
+      });
+    }
+  }, 350);
+}).on("mouseenter", e => {
+  clearTimeout(closingTimeOut);
+});
 // }
 
 

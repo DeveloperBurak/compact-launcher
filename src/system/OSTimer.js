@@ -1,21 +1,32 @@
+import {lockPC, shutdownPC, sleepPC} from "./System";
+
+const EE = require("events");
+
 class OSTimer {
 
   constructor(time = 0) {
+    EE.call(this);
     this.remainingTime = 0;
     this.timerInterval = null;
-    this.setRemainingTime(time);
+    this.action = null;
+    this.nearTimeTreshold = 3; // (in minute)
   }
 
-  setRemainingTime(remainingTime) {
-    this.remainingTime = remainingTime;
-    if (remainingTime > 1) {
-      console.log(this.timerInterval);
+  startTimer(time, action) {
+    if (time == null || action == null) {
+      return false;
+    }
+    this.remainingTime = time;
+    this.action = action;
+    if (time > 1) {
       if (this.timerInterval === null) {
-        this.timerInterval = setInterval(() => {
+        this.timerInterval = setInterval(async () => {
           this.remainingTime -= 1;
-          console.log(this.remainingTime);
+          if (this.remainingTime / 60 < this.nearTimeTreshold) {
+            this.emit("time-near", this.nearTimeTreshold);
+          }
           if (this.remainingTime <= 0) {
-            console.log('Times Up');
+            await this.runAction();
             this.clearTime();
           }
         }, 1000)
@@ -25,13 +36,29 @@ class OSTimer {
 
   clearTime() {
     clearInterval(this.timerInterval);
-    this.setRemainingTime(0);
     this.timerInterval = null;
+    this.remainingTime = 0;
+    this.action = null;
   }
 
   getRemainingTime() {
     return this.remainingTime;
   }
+
+  runAction() {
+    switch (this.action) {
+      case 'shutdown':
+        shutdownPC();
+        break;
+      case 'sleep':
+        sleepPC();
+        break;
+      case 'lock':
+        lockPC();
+        break;
+    }
+  }
 }
 
+OSTimer.prototype.__proto__ = EE.EventEmitter.prototype;
 export default new OSTimer();

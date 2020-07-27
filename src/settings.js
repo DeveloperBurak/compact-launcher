@@ -1,5 +1,6 @@
+import "./system-wide";
 import "./stylesheets/main.css";
-import "./stylesheets/settings.css";
+import "./stylesheets/sub-windows.css";
 import { ipcRenderer } from "electron";
 import env from "env";
 import $ from "jquery";

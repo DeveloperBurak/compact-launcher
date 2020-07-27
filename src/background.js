@@ -25,7 +25,7 @@ import {
   ipcSetAutoLaunch,
   ipcGetSetting,
   ipcGetSettingReady,
-  ipcSetAlwaysOnTop, ipcTimerStarted, ipcTimerStopped, ipcTimerRequestTime, ipcTimerRemainingTime,
+  ipcSetAlwaysOnTop, ipcTimerStarted, ipcTimerStopped, ipcTimerRequestTime, ipcTimerRemainingTime, ipcTimerSetTime, ipcDisableShutdown, ipcNotificationReceived,
 } from "./helpers/ipcActions";
 import {removeFile} from "./helpers/file";
 import {cacheProgramHTML} from "./configs/app";
@@ -41,7 +41,7 @@ import {
   setTray,
   startProgramTracking,
   getSetting,
-  setSetting, stopProgramTracking,
+  setSetting, stopProgramTracking, cancelShutDown,
 } from "./system/System";
 import {settingAlwaysOnTop} from "./helpers/settingKeys";
 
@@ -52,10 +52,13 @@ if (process.platform === "linux") {
   app.commandLine.appendSwitch("disable-gpu");
 }
 // windows
-let mainWindow = null;
-let expandedScene = null;
-let settingsWindow = null;
-let toolsWindow = null;
+
+let appWindows = {
+  mainWindow: null,
+  expandedScene: null,
+  settingsWindow: null,
+  toolsWindow: null
+}
 
 let tray;
 
@@ -65,7 +68,8 @@ if (version !== store.get("app.version") || version < 0.4) {
 }
 
 app.on("ready", () => {
-  mainWindow = openCollapsedWindow();
+  // mainWindow = openCollapsedWindow();
+  appWindows.toolsWindow = openToolsWindow();
   File.createRequiredFolders();
 
   try {
@@ -74,6 +78,7 @@ app.on("ready", () => {
   } catch (e) {
     console.log(e);
   }
+
   getSetting(settingAlwaysOnTop).then((value) => {
     if (value == null) {
       setSetting(settingAlwaysOnTop, true); // default is true
@@ -85,13 +90,17 @@ app.on("ready", () => {
     console.log(error)
   });
 });
+app.on('window-all-closed', () => {
+  appWindows.mainWindow = openCollapsedWindow();
+})
+
 
 ipcMain.on(scanPrograms, async () => {
   const cacheHTML = store.get(cacheProgramHTML);
   cacheHTML != null
-    ? mainWindow.webContents.send(itemsReady, {cache: cacheHTML})
+    ? appWindows.mainWindow.webContents.send(itemsReady, {cache: cacheHTML})
     : await ProgramHandler.readShortcutFolder().then((items) => {
-      if (mainWindow !== null) mainWindow.webContents.send(itemsReady, items);
+      if (appWindows.mainWindow !== null) appWindows.mainWindow.webContents.send(itemsReady, items);
     });
 });
 
@@ -109,16 +118,16 @@ ipcMain.on(removeProgramCache, () => {
 });
 
 ipcMain.on(expandWindow, (err, data) => {
-  expandedScene = openExpandedScene(data);
+  appWindows.expandedScene = openExpandedScene(data);
 });
 
 ipcMain.on(closeExpandWindow, async () => {
-  mainWindow = openCollapsedWindow();
+  appWindows.mainWindow = openCollapsedWindow();
 });
 
 ipcMain.on(launchProgram, (err, file) => {
   ProgramHandler.launch(file);
-  expandedScene.webContents.send(closeExpandWindow);
+  appWindows.expandedScene.webContents.send(closeExpandWindow);
 });
 
 ipcMain.on(removeProgram, (err, path) => {
@@ -147,16 +156,16 @@ ipcMain.on(getUserAnswer, (err, response) => {
 
 ipcMain.on(isSteamExists, () => {
   User.getSteamUser().then((steamPath) => {
-    expandedScene.webContents.send(isSteamUserExists, steamPath !== null);
+    appWindows.expandedScene.webContents.send(isSteamUserExists, steamPath !== null);
   });
 });
 
 ipcMain.on(openSettingWindow, () => {
-  settingsWindow = openSettingsWindow();
+  appWindows.settingsWindow = openSettingsWindow();
 });
 
 ipcMain.on(ipcOpenToolsWindow, () => {
-  toolsWindow = openToolsWindow();
+  appWindows.toolsWindow = openToolsWindow();
 });
 
 ipcMain.on(ipcSetAutoLaunch, (err, enabled) => {
@@ -174,26 +183,51 @@ ipcMain.on(ipcSetAlwaysOnTop, (err, enabled) => {
 
 ipcMain.on(ipcGetSetting, (err, name) => {
   getSetting(name).then((value) => {
-    settingsWindow.webContents.send(ipcGetSettingReady, value);
+    appWindows.settingsWindow.webContents.send(ipcGetSettingReady, value);
   }).catch(error => {
     console.log(error)
   });
 });
 
-ipcMain.on(ipcTimerStarted, (err, time) => {
-  OSTimer.setRemainingTime(time);
+let notificationSent = false;
+
+ipcMain.on(ipcTimerStarted, (err, data) => {
+  OSTimer.startTimer(data.time, data.action);
+  notificationSent = false;
 });
+
+OSTimer.on('time-near', (time) => {
+  if (!notificationSent) {
+    const notification = {
+      title: 'Remainder',
+      body: 'Pc is shutting down in ' + time + ' minute'
+    };
+    Object.keys(appWindows).forEach((key) => {
+      let window = appWindows[key];
+      if (window != null && !window.isDestroyed()) window.webContents.send(ipcNotificationReceived, notification);
+    })
+  }
+  notificationSent = true;
+})
+
+ipcMain.on(ipcTimerSetTime, (err, data) => {
+  OSTimer.clearTime();
+  OSTimer.startTimer(data.timeLeft, data.action);
+  notificationSent = false;
+});
+
 ipcMain.on(ipcTimerStopped, () => {
   OSTimer.clearTime();
 });
 
 ipcMain.on(ipcTimerRequestTime, () => {
-  toolsWindow.webContents.send(ipcTimerRemainingTime, OSTimer.getRemainingTime());
+  appWindows.toolsWindow.webContents.send(ipcTimerRemainingTime, OSTimer.getRemainingTime());
 });
 
+ipcMain.on(ipcDisableShutdown, () => {
+  cancelShutDown();
+})
 
-export const settingWindow = () => {
-  settingsWindow = openSettingsWindow();
+export const settingWindow = () => {// it required for tray
+  appWindows.settingsWindow = openSettingsWindow();
 }
-
-
