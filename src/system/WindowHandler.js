@@ -104,12 +104,12 @@ export const openToolsWindow = () => {
     }).on("closed", () => {
       toolsWindow = null;
     });
-    toolsWindow.openDevTools();
+    // toolsWindow.openDevTools();
   }
   return toolsWindow;
 };
 
-ipcMain.on(ipcSetAlwaysOnTop, (err, enabled) => {
+ipcMain.on(ipcSetAlwaysOnTop, (err, enabled) => { // disable the always on top all windows
   if (mainWindow != null)
     mainWindow.setAlwaysOnTop(enabled);
   if (expandedWindow != null)

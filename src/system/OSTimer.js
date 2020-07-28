@@ -1,9 +1,8 @@
-import {lockPC, shutdownPC, sleepPC} from "./System";
+import { lockPC, shutdownPC, sleepPC } from "./System";
 
 const EE = require("events");
 
 class OSTimer {
-
   constructor(time = 0) {
     EE.call(this);
     this.remainingTime = 0;
@@ -23,15 +22,41 @@ class OSTimer {
         this.timerInterval = setInterval(async () => {
           this.remainingTime -= 1;
           if (this.remainingTime / 60 < this.nearTimeTreshold) {
-            this.emit("time-near", this.nearTimeTreshold);
+            this.emit("time-near");
           }
           if (this.remainingTime <= 0) {
             await this.runAction();
             this.clearTime();
           }
-        }, 1000)
+        }, 1000);
       }
     }
+  }
+
+  getNotification() {
+    let notification;
+    switch (this.action) {
+      case "shutdown":
+        notification = {
+          title: "Remainder",
+          body: "Pc is shutting down in " + this.nearTimeTreshold + " minute",
+        };
+        break;
+      case "sleep":
+        notification = {
+          title: "Remainder",
+          body: "Pc will go to sleep in " + this.nearTimeTreshold + " minute",
+        };
+        break;
+      case "lock":
+        notification = {
+          title: "Remainder",
+          body: "Pc will be locked in " + this.nearTimeTreshold + " minute",
+        };
+        break;
+    }
+
+    return notification;
   }
 
   clearTime() {
@@ -47,13 +72,13 @@ class OSTimer {
 
   runAction() {
     switch (this.action) {
-      case 'shutdown':
+      case "shutdown":
         shutdownPC();
         break;
-      case 'sleep':
+      case "sleep":
         sleepPC();
         break;
-      case 'lock':
+      case "lock":
         lockPC();
         break;
     }

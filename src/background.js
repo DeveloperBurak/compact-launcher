@@ -1,4 +1,4 @@
-import {app, ipcMain} from "electron";
+import { app, ipcMain } from "electron";
 import ProgramHandler from "./system/ProgramHandler";
 import Store from "electron-store";
 import User from "./system/User";
@@ -25,10 +25,17 @@ import {
   ipcSetAutoLaunch,
   ipcGetSetting,
   ipcGetSettingReady,
-  ipcSetAlwaysOnTop, ipcTimerStarted, ipcTimerStopped, ipcTimerRequestTime, ipcTimerRemainingTime, ipcTimerSetTime, ipcDisableShutdown, ipcNotificationReceived,
+  ipcSetAlwaysOnTop,
+  ipcTimerStarted,
+  ipcTimerStopped,
+  ipcTimerRequestTime,
+  ipcTimerRemainingTime,
+  ipcTimerSetTime,
+  ipcDisableShutdown,
+  ipcNotificationReceived,
 } from "./helpers/ipcActions";
-import {removeFile} from "./helpers/file";
-import {cacheProgramHTML} from "./configs/app";
+import { removeFile } from "./helpers/file";
+import { cacheProgramHTML } from "./configs/app";
 import Program from "./system/Program";
 import {
   openCollapsedWindow,
@@ -41,9 +48,11 @@ import {
   setTray,
   startProgramTracking,
   getSetting,
-  setSetting, stopProgramTracking, cancelShutDown,
+  setSetting,
+  stopProgramTracking,
+  cancelShutDown,
 } from "./system/System";
-import {settingAlwaysOnTop} from "./helpers/settingKeys";
+import { settingAlwaysOnTop } from "./helpers/settingKeys";
 
 const store = new Store();
 
@@ -57,8 +66,8 @@ let appWindows = {
   mainWindow: null,
   expandedScene: null,
   settingsWindow: null,
-  toolsWindow: null
-}
+  toolsWindow: null,
+};
 
 let tray;
 
@@ -68,8 +77,8 @@ if (version !== store.get("app.version") || version < 0.4) {
 }
 
 app.on("ready", () => {
-  // mainWindow = openCollapsedWindow();
-  appWindows.toolsWindow = openToolsWindow();
+  appWindows.mainWindow = openCollapsedWindow();
+  // appWindows.toolsWindow = openToolsWindow();
   File.createRequiredFolders();
 
   try {
@@ -79,29 +88,31 @@ app.on("ready", () => {
     console.log(e);
   }
 
-  getSetting(settingAlwaysOnTop).then((value) => {
-    if (value == null) {
-      setSetting(settingAlwaysOnTop, true); // default is true
-    }
-    if (value == null || value) {
-      startProgramTracking();
-    }
-  }).catch(error => {
-    console.log(error)
-  });
+  getSetting(settingAlwaysOnTop)
+    .then((value) => {
+      if (value == null) {
+        setSetting(settingAlwaysOnTop, true); // default is true
+      }
+      if (value == null || value) {
+        startProgramTracking();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 });
-app.on('window-all-closed', () => {
+app.on("window-all-closed", () => {
   appWindows.mainWindow = openCollapsedWindow();
-})
-
+});
 
 ipcMain.on(scanPrograms, async () => {
   const cacheHTML = store.get(cacheProgramHTML);
   cacheHTML != null
-    ? appWindows.mainWindow.webContents.send(itemsReady, {cache: cacheHTML})
+    ? appWindows.mainWindow.webContents.send(itemsReady, { cache: cacheHTML })
     : await ProgramHandler.readShortcutFolder().then((items) => {
-      if (appWindows.mainWindow !== null) appWindows.mainWindow.webContents.send(itemsReady, items);
-    });
+        if (appWindows.mainWindow !== null)
+          appWindows.mainWindow.webContents.send(itemsReady, items);
+      });
 });
 
 ipcMain.on(cacheScannedPrograms, (err, cache) => {
@@ -156,7 +167,10 @@ ipcMain.on(getUserAnswer, (err, response) => {
 
 ipcMain.on(isSteamExists, () => {
   User.getSteamUser().then((steamPath) => {
-    appWindows.expandedScene.webContents.send(isSteamUserExists, steamPath !== null);
+    appWindows.expandedScene.webContents.send(
+      isSteamUserExists,
+      steamPath !== null
+    );
   });
 });
 
@@ -182,11 +196,13 @@ ipcMain.on(ipcSetAlwaysOnTop, (err, enabled) => {
 });
 
 ipcMain.on(ipcGetSetting, (err, name) => {
-  getSetting(name).then((value) => {
-    appWindows.settingsWindow.webContents.send(ipcGetSettingReady, value);
-  }).catch(error => {
-    console.log(error)
-  });
+  getSetting(name)
+    .then((value) => {
+      appWindows.settingsWindow.webContents.send(ipcGetSettingReady, value);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 });
 
 let notificationSent = false;
@@ -196,19 +212,17 @@ ipcMain.on(ipcTimerStarted, (err, data) => {
   notificationSent = false;
 });
 
-OSTimer.on('time-near', (time) => {
+OSTimer.on("time-near", (time) => {
   if (!notificationSent) {
-    const notification = {
-      title: 'Remainder',
-      body: 'Pc is shutting down in ' + time + ' minute'
-    };
+    const notification = OSTimer.getNotification();
     Object.keys(appWindows).forEach((key) => {
       let window = appWindows[key];
-      if (window != null && !window.isDestroyed()) window.webContents.send(ipcNotificationReceived, notification);
-    })
+      if (window != null && !window.isDestroyed())
+        window.webContents.send(ipcNotificationReceived, notification);
+    });
   }
   notificationSent = true;
-})
+});
 
 ipcMain.on(ipcTimerSetTime, (err, data) => {
   OSTimer.clearTime();
@@ -221,13 +235,17 @@ ipcMain.on(ipcTimerStopped, () => {
 });
 
 ipcMain.on(ipcTimerRequestTime, () => {
-  appWindows.toolsWindow.webContents.send(ipcTimerRemainingTime, OSTimer.getRemainingTime());
+  appWindows.toolsWindow.webContents.send(
+    ipcTimerRemainingTime,
+    OSTimer.getRemainingTime()
+  );
 });
 
 ipcMain.on(ipcDisableShutdown, () => {
   cancelShutDown();
-})
+});
 
-export const settingWindow = () => {// it required for tray
+export const settingWindow = () => {
+  // it required for tray
   appWindows.settingsWindow = openSettingsWindow();
-}
+};
