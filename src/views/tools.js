@@ -1,17 +1,18 @@
 import "./system-wide";
-import "./stylesheets/main.css";
-import "./stylesheets/sub-windows.css";
-import "./components/number-input.js";
-import {ipcRenderer} from "electron";
+import "../stylesheets/main.css";
+import "../stylesheets/sub-windows.css";
+import "../components/number-input.js";
+import {
+  ipcRenderer
+} from "electron";
 import env from "env";
 import $ from "jquery";
 
-import {ipcDisableShutdown, ipcTimerRemainingTime, ipcTimerRequestTime, ipcTimerSetTime, ipcTimerStarted, ipcTimerStopped} from "./helpers/ipcActions";
+import * as ipc from "../helpers/ipcActions";
 
 const tab = require('bootstrap').Tab;
 const ProgressBar = require("progressbar.js");
 let timerInterval = null;
-// const progressBar = $('#circle');
 let progressBar = new ProgressBar.Line('#line', {
   color: '#eeeeee',
   easing: 'easeOut',
@@ -28,8 +29,8 @@ const btnReduceTime = $('#reduce-time');
 const selectorAction = $('#action');
 const btnDisableShutdown = $('#disable-shutdown');
 let timeLeft = 0;
-ipcRenderer.send(ipcTimerRequestTime);
-ipcRenderer.on(ipcTimerRemainingTime, (err, time) => {
+ipcRenderer.send(ipc.timerRequestTime);
+ipcRenderer.on(ipc.timerRemainingTime, (err, time) => {
   if (time > 0) {
     startTimer(time);
   }
@@ -57,7 +58,7 @@ $(document).ready(() => {
         time: time,
         action: action
       }
-      ipcRenderer.send(ipcTimerStarted, data);
+      ipcRenderer.send(ipc.timerStarted, data);
       startTimer(time);
     }
   });
@@ -71,7 +72,7 @@ $(document).ready(() => {
     changeTime('reduce', $('#time'))
   });
   btnDisableShutdown.on('click', () => {
-    ipcRenderer.send(ipcDisableShutdown);
+    ipcRenderer.send(ipc.disableShutdown);
     btnStartTimer.show();
     selectorAction.show();
     btnDisableShutdown.addClass('d-none');
@@ -97,8 +98,8 @@ function startTimer(timeLimit = 10, timeLength = "second", startNew = true) {
 
       if (timeLeft <= 0) {
         stopTimer(false);
-        let event = new CustomEvent('times-up');// Create the event
-        document.dispatchEvent(event);// Dispatch/Trigger/Fire the event
+        let event = new CustomEvent('times-up'); // Create the event
+        document.dispatchEvent(event); // Dispatch/Trigger/Fire the event
         let additionalDesc = '';
         if (selectorAction.val() === 'shutdown') additionalDesc = " <br>Pc is shutting down...";
         progressTimerText.html('Times Up' + additionalDesc);
@@ -117,7 +118,7 @@ function startTimer(timeLimit = 10, timeLength = "second", startNew = true) {
 function stopTimer(interrupted = true) {
   clearInterval(timerInterval);
   timerInterval = null;
-  if (interrupted) ipcRenderer.send(ipcTimerStopped);
+  if (interrupted) ipcRenderer.send(ipc.timerStopped);
   progressBar.set(0);
   progressBar.stop();
   progressTimerText.html(null);
@@ -164,16 +165,20 @@ function changeTime(action, element) {
   const timeLength = $('input[name=time-length]:checked').val();
   time = calculateTime(time, timeLength);
   if (action === 'add') {
-    timeLeft = time + timeLeft + 1;// +1 for waiting time
+    timeLeft = time + timeLeft + 1; // +1 for waiting time
   } else if (action === 'reduce') {
-    timeLeft = timeLeft - time + 1;// +1 for waiting time
+    timeLeft = timeLeft - time + 1; // +1 for waiting time
     if (timeLeft <= 0) timeLeft = 0;
   }
-  let event = new CustomEvent('timeLeft-changed', {detail: {timeLeft: timeLeft}}); // create event
+  let event = new CustomEvent('timeLeft-changed', {
+    detail: {
+      timeLeft: timeLeft
+    }
+  }); // create event
   document.dispatchEvent(event);
   const data = {
     timeLeft: timeLeft,
     action: selectorAction.val()
   }
-  ipcRenderer.send(ipcTimerSetTime, data);
+  ipcRenderer.send(ipc.timerSetTime, data);
 }

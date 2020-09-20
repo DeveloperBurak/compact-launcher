@@ -1,12 +1,14 @@
 {
   "collapsedScreen": {
-    "width": 15,
-    "height": 35,
+    "width": 600,
+    "height": 600,
     "transparent": false,
-    "type": "toolbar"
+    "type": "toolbar",
+    "alwaysOnTop": true
   },
   "expandedScreen": {
-    "transparent": true
+    "transparent": true,
+    "alwaysOnTop": true
   },
   "steamDialogue": {
     "width": 500,
@@ -21,7 +23,6 @@
     "frame": true,
     "width": 400,
     "height": 525,
-    "alwaysOnTop": true,
     "titleBarStyle": "hidden",
     "modal": true,
     "title": "Settings",
@@ -32,8 +33,7 @@
     "center": true,
     "frame": true,
     "width": 600,
-    "height": 300,
-    "alwaysOnTop": true,
+    "height": 450,
     "titleBarStyle": "hidden",
     "modal": true,
     "parent": "top",

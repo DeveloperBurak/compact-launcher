@@ -1,6 +1,6 @@
 import {app} from "electron";
 import ActiveWindowTracker from "../system/ActiveWindowTracker";
-import {settingWindow} from "../background";
+import {openSettingsWindow} from "../system/WindowHandler";
 
 
 export const trayMenuTemplate = [
@@ -19,7 +19,7 @@ export const trayMenuTemplate = [
   {
     label: "Settings",
     click: () => {
-      settingWindow();
+      openSettingsWindow();
     }
   },
   {

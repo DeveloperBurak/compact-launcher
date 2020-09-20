@@ -1,15 +1,6 @@
 import Steam from "./Steam";
 
 class User {
-  constructor() {
-
-  }
-
-  // TODO make more program support. we use only steam for now
-  check() {
-
-  }
-
   async read(file) {
     fs.readFile(file, {encoding: 'utf-8'}, function (err, data) {
       if (!err) {
@@ -26,10 +17,6 @@ class User {
         resolve(path);
       })
     });
-  }
-
-  set() {
-
   }
 }
 

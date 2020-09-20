@@ -8,6 +8,7 @@ export const getSteamUser = 'steam:user:get';
 export const isSteamUserExists = 'steam:user:exists';
 export const isSteamExists = 'steam:check:exists';
 export const getUserAnswer = 'stem:user:answer';
+export const disconnectUser = 'user:disconnect';
 
 export const launchProgram = 'program:launch';
 export const removeProgram = 'program:remove';
@@ -22,16 +23,17 @@ export const openSubWindow = 'window:open:subWindow'; // TODO continue this
 
 export const systemLog = 'console:log';
 
-export const ipcSetAutoLaunch = 'system:setAutoLaunch';
-export const ipcSetAlwaysOnTop = 'system:setAlwaysOnTop';
-export const ipcGetSetting = 'system:getSetting';
-export const ipcGetSettingReady = 'system:getSetting:ready';
-export const ipcDisableShutdown = 'system:shutdown:disable';
-export const ipcNotificationReceived = 'system:notification:received';
+export const setSetting = 'system:set:setting';
+export const setAutoLaunch = 'system:setAutoLaunch';
+export const setAlwaysOnTop = 'system:setAlwaysOnTop';
+export const getSetting = 'system:get:setting';
+export const getSettingReady = 'system:getSetting:ready';
+export const disableShutdown = 'system:shutdown:disable';
+export const notificationReceived = 'system:notification:received';
 
-export const ipcTimerStarted = 'tools:timer:started';
-export const ipcTimerSetTime = 'tools:timer:set:time';
-export const ipcTimerFinished = 'tools:timer:finished';
-export const ipcTimerStopped = 'tools:timer:stopped';
-export const ipcTimerRequestTime = 'tools:timer:request:time'; // send a request from client
-export const ipcTimerRemainingTime = 'tools:timer:time';
+export const timerStarted = 'tools:timer:started';
+export const timerSetTime = 'tools:timer:set:time';
+export const timerFinished = 'tools:timer:finished';
+export const timerStopped = 'tools:timer:stopped';
+export const timerRequestTime = 'tools:timer:request:time'; // send a request from client
+export const timerRemainingTime = 'tools:timer:time';

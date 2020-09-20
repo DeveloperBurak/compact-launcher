@@ -1,9 +1,9 @@
 import File from "./File";
-import { scan } from "../helpers/folder";
+import {
+  scan
+} from "../helpers/folder";
 import execute from "../helpers/execute";
 import path from "path";
-import { rejects } from "assert";
-import { exec } from "child_process";
 const fs = require("fs");
 
 class ProgramHandler {
@@ -33,8 +33,7 @@ class ProgramHandler {
       if (data[item].hasOwnProperty("file") && data[item].file === true) {
         if (!hasCategory) {
           data["Uncategorized"]["programs"][count] = Object.assign(
-            data[count],
-            {
+            data[count], {
               image: path.join(
                 File.get("images"),
                 data[count]["name"] + ".jpg"
@@ -80,9 +79,10 @@ class ProgramHandler {
       let command = null;
       switch (process.platform) {
         case "win32":
-          command = 'start "" "' + file + '"';
+          command = 'start "" "' + file + '"';  // "" is required, otherwise command execute as cd
+          resolve(command);
           break;
-        // TODO
+          // TODO
         case "linux":
           // check the file has execute permission
           fs.access(file.replace(/(\s+)/g, "$1"), fs.constants.X_OK, (err) => {
@@ -92,21 +92,21 @@ class ProgramHandler {
               command = "gtk-launch " + file.replace(/(\s+)/g, "$1");
               fs.readFile(file.replace(/(\s+)/g, "$1"), function (err, data) {
                 if (err) return console.error(err);
-                // TODO
                 const regex = "/\bExec=(.*)+";
-                // const regex = "/.*";
                 let execString = data.toString();
                 execString = execString.search(regex);
-                console.log("Sh: " + execString);
               });
-
-              // resolve(command);
             }
           });
           break;
-        // TODO
+          // TODO
         case "darwin":
           break;
+      }
+      if (command !== null) {
+        resolve(command)
+      } else {
+        reject("OS not supported")
       }
     });
   }

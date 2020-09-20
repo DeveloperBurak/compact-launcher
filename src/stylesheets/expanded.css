@@ -1,5 +1,6 @@
 @import "~alertifyjs/build/css/alertify.min.css";
 @import "~alertifyjs/build/css/themes/bootstrap.min.css";
+
 ul {
   padding: 0;
   list-style: none;
@@ -10,7 +11,8 @@ ul {
   margin-left: -500px;
 }
 
-.btn.disabled, .btn:disabled {
+.btn.disabled,
+.btn:disabled {
   opacity: 1;
 }
 
@@ -24,7 +26,7 @@ ul {
   left: 0;
 }
 
-.dropdown-list > li {
+.dropdown-list>li {
   position: relative;
 }
 
@@ -63,7 +65,7 @@ button:focus {
   z-index: 1;
 }
 
-.context-menu-list{
+.context-menu-list {
   position: absolute;
   background-color: white;
 }
@@ -132,17 +134,49 @@ button:focus {
   align-items: center;
 }
 
+.modal .modal-body {
+  display: flex;
+  justify-content: center;
+}
+
 .btn.auth-steam svg {
   color: #2a475e;
 }
 
-@-webkit-keyframes rotating /* Safari and Chrome */
-{
+
+.btn-auth-program {
+  position: relative;
+}
+
+
+.btn-disconnect-user {
+  display: none;
+  background: red;
+  color: white;
+  font-weight: 600;
+  position: absolute;
+  right: 0;
+  top: -5px;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 10px;
+}
+
+.btn-disconnect-user:hover {
+  cursor: pointer;
+}
+
+
+@-webkit-keyframes rotating
+
+/* Safari and Chrome */
+  {
   from {
     -webkit-transform: rotate(0deg);
     -o-transform: rotate(0deg);
     transform: rotate(0deg);
   }
+
   to {
     -webkit-transform: rotate(360deg);
     -o-transform: rotate(360deg);
@@ -158,6 +192,7 @@ button:focus {
     -o-transform: rotate(0deg);
     transform: rotate(0deg);
   }
+
   to {
     -ms-transform: rotate(360deg);
     -moz-transform: rotate(360deg);

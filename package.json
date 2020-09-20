@@ -18,9 +18,9 @@
         "snap"
       ]
     },
-    "win":{ 
-      "target": "nsis", 
-      "publish" : [] 
+    "win": {
+      "target": "nsis",
+      "publish": []
     },
     "files": [
       "app/**/*",

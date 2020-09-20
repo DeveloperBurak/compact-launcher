@@ -6,11 +6,11 @@ module.exports = env => {
   return merge(base(env), {
     entry: {
       background: "./src/background.js",
-      app: "./src/app.js",
-      expanded: "./src/expanded.js",
-      settings: "./src/settings.js",
-      tools: "./src/tools.js",
-      systemWide: "./src/system-wide.js",
+      app: "./src/views/app.js",
+      expanded: "./src/views/expanded.js",
+      settings: "./src/views/settings.js",
+      tools: "./src/views/tools.js",
+      systemWide: "./src/views/system-wide.js",
     },
     output: {
       filename: "[name].js",

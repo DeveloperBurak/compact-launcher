@@ -1,20 +1,16 @@
 import "./system-wide";
-import "./stylesheets/main.css";
-import "./stylesheets/sub-windows.css";
-import { ipcRenderer } from "electron";
+import "../stylesheets/main.css";
+import "../stylesheets/sub-windows.css";
+import {
+  ipcRenderer
+} from "electron";
 import env from "env";
 import $ from "jquery";
-import {
-  systemLog,
-  ipcSetAutoLaunch,
-  ipcGetSetting,
-  ipcGetSettingReady,
-  ipcSetAlwaysOnTop
-} from "./helpers/ipcActions";
+import * as ipc from "../helpers/ipcActions";
 
 const tab = require("bootstrap").Tab;
-ipcRenderer.send(ipcGetSetting, null);
-ipcRenderer.on(ipcGetSettingReady, (err, settings) => {
+ipcRenderer.send(ipc.getSetting, null);
+ipcRenderer.on(ipc.getSettingReady, (err, settings) => {
   for (let key in settings) {
     const value = settings[key];
     let htmlSelector = $("#" + key);
@@ -36,10 +32,16 @@ $(document).ready(() => {
   if (env.name !== "development") {
     $(".development").hide();
   }
+  $('.input-setting').change(function (e) {
+    ipcRenderer.send(ipc.setSetting, {
+      key: $(e.currentTarget).attr('id'),
+      value: $(this).prop("checked")
+    });
+  })
   $("#autoLaunch").change(function () {
-    ipcRenderer.send(ipcSetAutoLaunch, $(this).prop("checked"));
+    ipcRenderer.send(ipc.setAutoLaunch, $(this).prop("checked"));
   });
   $("#alwaysOnTop").change(function () {
-    ipcRenderer.send(ipcSetAlwaysOnTop, $(this).prop("checked"));
+    ipcRenderer.send(ipc.setAlwaysOnTop, $(this).prop("checked"));
   });
 });

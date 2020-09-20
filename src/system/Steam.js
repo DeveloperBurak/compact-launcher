@@ -1,6 +1,12 @@
 import File from "./File";
-import {fileExists, readVdf} from '../helpers/file';
+import {
+  fileExists,
+  readVdf
+} from '../helpers/file';
 import Store from "electron-store";
+import {
+  systemPreferences
+} from "electron";
 const store = new Store();
 
 const fs = require('fs');
@@ -8,12 +14,17 @@ const fs = require('fs');
 class Steam {
 
   constructor() {
-    this.steamUserFile = 'steam.json';
     this.STEAM_REG_PATH = '\\Software\\Valve\\Steam';
     this.steamLoginUsersVdf = '/config/loginusers.vdf';
+    this.storeName = 'user:steam';
+  }
+
+  setSteamUserFilePath() { // we cant set in constructor
+    this.steamUserFile = File.get('userdata') + '/steam.json';
   }
 
   async getInstalledPath() {
+    this.setSteamUserFilePath();
     return new Promise((resolve, reject) => {
       if (process.platform === 'win32') {
         let Winreg = require('winreg');
@@ -39,13 +50,13 @@ class Steam {
   }
 
   getUser() {
-    let steamUserFile = File.get('userdata') + '/' + this.steamUserFile;
+    this.setSteamUserFilePath();
     return new Promise((resolve, reject) => {
-      let user = store.get('user');
+      let user = store.get(this.storeName);
       if (user === null) {
-        fileExists(steamUserFile).then(result => {
+        fileExists(this.steamUserFile).then(result => {
           if (result) {
-            fs.readFile(steamUserFile, (err, data) => {
+            fs.readFile(this.steamUserFile, (err, data) => {
               if (err) {
                 if (err.code === 'ENOENT') {
                   reject(file + ' does not exist');
@@ -53,10 +64,10 @@ class Steam {
                 }
                 reject(err);
               }
-              try{
+              try {
                 resolve(JSON.parse(data.toString('utf8')));
-              }catch (e) {
-                fs.unlink(steamUserFile,() =>{
+              } catch (e) {
+                fs.unlink(this.steamUserFile, () => {
                   this.getUser();
                 });
                 reject(e.getMessage);
@@ -73,8 +84,8 @@ class Steam {
   }
 
   setUser(answer, callback) {
-    let steamUserFile = File.get('userdata') + '/' + this.steamUserFile;
-    fileExists(steamUserFile).then(result => {
+    this.setSteamUserFilePath();
+    fileExists(this.steamUserFile).then(result => {
       new Promise((resolve, reject) => {
         let userObject;
         if (answer) {
@@ -87,22 +98,28 @@ class Steam {
                 let userInfo = users[user];
                 for (let property in userInfo) {
                   if (!userInfo.hasOwnProperty(property)) continue;
-                  if (property === 'mostrecent' && userInfo[property] === 1) {
+                  if (property.toLowerCase() === 'mostrecent' && userInfo[property] === 1) {
                     selectedUser = userInfo;
                     selectedUser.id = user;
                   }
                 }
               }
-              userObject = {
-                account: {
-                  persona: selectedUser.PersonaName,
-                  name: selectedUser.AccountName,
-                  id: selectedUser.id,
-                  steam: true
+              if (selectedUser !== null) {
+                userObject = {
+                  account: {
+                    persona: selectedUser.PersonaName,
+                    name: selectedUser.AccountName,
+                    id: selectedUser.id,
+                    steam: true
+                  }
                 }
-              };
-              store.set('user', userObject);
-              resolve(userObject);
+                store.set(this.storeName, userObject);
+                resolve(userObject);
+              } else {
+                reject("User Not Found");
+              }
+
+
             });
           });
         } else {
@@ -115,13 +132,21 @@ class Steam {
         if (typeof callback !== "undefined") {
           callback(userObject);
         }
-        fs.writeFileSync(steamUserFile, JSON.stringify(userObject));
+        fs.writeFileSync(this.steamUserFile, JSON.stringify(userObject));
       });
     });
   }
 
-  deleteUser(){
-
+  disconnectUser() {
+    this.setSteamUserFilePath();
+    store.delete(this.storeName);
+    fileExists(this.steamUserFile).then(exists => {
+      if (exists) {
+        fs.unlink(this.steamUserFile, (err) => {
+          if(err != null) console.log(err);          
+        });
+      }
+    })
   }
 
   isUserExists() {

@@ -5,7 +5,7 @@
 
 import { BrowserWindow, screen } from "electron";
 import { getSetting } from "../system/System";
-import { settingAlwaysOnTop } from "./settingKeys";
+import * as setting from "./settingKeys";
 
 export default (name, options) => {
   let win;
@@ -14,12 +14,12 @@ export default (name, options) => {
   options.frame = options.frame ?? false;
   options.transparent = options.transparent ?? false;
   options.useContentSize = options.useContentSize ?? false;
-  options.alwaysOnTop = options.alwaysOnTop ?? true;
+  options.alwaysOnTop = options.alwaysOnTop ?? false;
   options.skipTaskbar = options.skipTaskbar ?? true;
   options.resizable = options.resizable ?? false;
   options.show = options.show ?? false;
   options.webPreferences = { nodeIntegration: true };
-  getSetting(settingAlwaysOnTop).then((value) => {
+  getSetting(setting.alwaysOnTop).then((value) => {
     if (value != null) {
       options.alwaysOnTop = value;
     }
@@ -32,8 +32,11 @@ export default (name, options) => {
   }
 
   if (options.width == null && options.height == null) {
-    const { width, height } = screen.getPrimaryDisplay().size;
+    const { width } = screen.getPrimaryDisplay().size;
     options.width = width;
+  }
+  if(options.height == null){
+    const { height } = screen.getPrimaryDisplay().size;
     options.height = height;
   }
   win = new BrowserWindow(Object.assign({}, options));
