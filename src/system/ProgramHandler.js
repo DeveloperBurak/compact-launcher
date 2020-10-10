@@ -1,7 +1,5 @@
 import File from "./File";
-import {
-  scan
-} from "../helpers/folder";
+import { scan } from "../helpers/folder";
 import execute from "../helpers/execute";
 import path from "path";
 const fs = require("fs");
@@ -14,6 +12,9 @@ class ProgramHandler {
   async readShortcutFolder() {
     await scan(File.get("shortcuts")).then(async (data) => {
       await this.generateProgram(data).then((processedData) => {
+        if (processedData.Uncategorized.programs.length === 0) {
+          delete processedData.Uncategorized;
+        }
         this.programs["categories"] = processedData;
       });
     });
@@ -33,7 +34,8 @@ class ProgramHandler {
       if (data[item].hasOwnProperty("file") && data[item].file === true) {
         if (!hasCategory) {
           data["Uncategorized"]["programs"][count] = Object.assign(
-            data[count], {
+            data[count],
+            {
               image: path.join(
                 File.get("images"),
                 data[count]["name"] + ".jpg"
@@ -79,10 +81,10 @@ class ProgramHandler {
       let command = null;
       switch (process.platform) {
         case "win32":
-          command = 'start "" "' + file + '"';  // "" is required, otherwise command execute as cd
+          command = 'start "" "' + file + '"'; // "" is required, otherwise command execute as cd
           resolve(command);
           break;
-          // TODO
+        // TODO
         case "linux":
           // check the file has execute permission
           fs.access(file.replace(/(\s+)/g, "$1"), fs.constants.X_OK, (err) => {
@@ -99,14 +101,14 @@ class ProgramHandler {
             }
           });
           break;
-          // TODO
+        // TODO
         case "darwin":
           break;
       }
       if (command !== null) {
-        resolve(command)
+        resolve(command);
       } else {
-        reject("OS not supported")
+        reject("OS not supported");
       }
     });
   }

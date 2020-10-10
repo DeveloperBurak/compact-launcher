@@ -27,7 +27,7 @@ export const openCollapsedWindow = () => {
   );
   appWindows.mainWindow.on("ready-to-show", () => {
     appWindows.mainWindow.show();
-    appWindows.mainWindow.openDevTools();
+    //appWindows.mainWindow.openDevTools();
     if (appWindows.expandedWindow != null) appWindows.expandedWindow.close();
   });
   appWindows.mainWindow.on('closed', () => {
@@ -48,7 +48,7 @@ export const openExpandedScene = (data) => {
 
   appWindows.expandedWindow.on("ready-to-show", () => {
     appWindows.expandedWindow.show();
-    appWindows.expandedWindow.openDevTools();
+    // appWindows.expandedWindow.openDevTools();
     appWindows.expandedWindow.webContents.send(renderItem, data);
     Steam.getUser().then((user) => {
       if (user != null && user.account !== false) {
@@ -87,7 +87,7 @@ export const openSettingsWindow = () => {
     }).on("closed", () => {
       appWindows.settingsWindow = null;
     });
-    appWindows.settingsWindow.openDevTools();
+    // appWindows.settingsWindow.openDevTools();
   }
   return appWindows.settingsWindow;
 };

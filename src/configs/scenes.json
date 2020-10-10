@@ -1,7 +1,7 @@
 {
   "collapsedScreen": {
-    "width": 600,
-    "height": 600,
+    "width": 30,
+    "height": 15,
     "transparent": false,
     "type": "toolbar",
     "alwaysOnTop": true
