@@ -21,7 +21,7 @@ ipcRenderer.on(ipc.getSettingReady, (err, settings) => {
   }
 });
 
-$(document).ready(() => {
+$(() => {
   $("#settingTab").tab();
   $("#settingTab>li>a").on("click", (e) => {
     $("#settingTab>li>a").removeClass("active");

@@ -1,14 +1,7 @@
-import {
-  lockPC,
-  shutdownPC,
-  sleepPC
-} from "./System";
-import {
-  isNumber
-} from "util";
+import { lockPC, shutdownPC, sleepPC } from "./System";
+import { isNumber } from "util";
 
 const EE = require("events");
-
 
 // OS Action(like sleep, shutdown etc.) Timer
 class OSTimer {
@@ -21,13 +14,14 @@ class OSTimer {
   }
 
   /**
-   * 
-   * @param {!number} time 
-   * @param {!string} action 
+   *
+   * @param {!number} time
+   * @param {!string} action
    * @returns {void}
    */
-  startTimer(time, action) { // 
-    if (time == null || action == null || !isNumber(time)) {
+  startTimer(time, action) {
+    //
+    if (time == null || action == null || typeof time !== "number") {
       return false;
     }
     let timeTresholdReached = false;
@@ -38,7 +32,7 @@ class OSTimer {
         this.timerInterval = setInterval(async () => {
           this.remainingTime -= 1;
           if (!timeTresholdReached) {
-            if (this.remainingTime /  60 === this.nearTimeTreshold) {
+            if (this.remainingTime / 60 === this.nearTimeTreshold) {
               timeTresholdReached = true;
               this.emit("time-near");
             }
@@ -61,19 +55,28 @@ class OSTimer {
       case "shutdown":
         notification = {
           title: "Remainder",
-          body: "Pc is shutting down in " + Math.ceil(this.remainingTime / 60) + " minute",
+          body:
+            "Pc is shutting down in " +
+            Math.ceil(this.remainingTime / 60) +
+            " minute",
         };
         break;
       case "sleep":
         notification = {
           title: "Remainder",
-          body: "Pc will go to sleep in " + Math.ceil(this.remainingTime / 60) + " minute",
+          body:
+            "Pc will go to sleep in " +
+            Math.ceil(this.remainingTime / 60) +
+            " minute",
         };
         break;
       case "lock":
         notification = {
           title: "Remainder",
-          body: "Pc will be locked in " + Math.ceil(this.remainingTime / 60) + " minute",
+          body:
+            "Pc will be locked in " +
+            Math.ceil(this.remainingTime / 60) +
+            " minute",
         };
         break;
     }

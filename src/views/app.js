@@ -3,7 +3,7 @@ import "../stylesheets/main.css";
 import "../stylesheets/collapsed.css";
 import {
   expandOnHover
-} from './../helpers/settingKeys';
+} from "./../helpers/settingKeys";
 
 import {
   ipcRenderer
@@ -11,38 +11,41 @@ import {
 
 import {
   getSetting,
-  getSettingReady
+  getSettingReady,
+  systemLog
 } from "../helpers/ipcActions";
 
 const expandButton = document.getElementById('expandButton');
-ipcRenderer.send(getSetting, null);
-ipcRenderer.on(getSettingReady, (err, settings) => {
-  if (settings.expandOnHover === true) {
-    let openingTimeout = null;
-    expandButton.addEventListener("mouseleave", e => {
-      console.log(e);
-      clearTimeout(openingTimeout);
-      openingTimeout = null;
-    });
-    expandButton.addEventListener("mouseenter", e => {
-      openingTimeout = setTimeout(() => {
+ipcRenderer.send(getSetting, expandOnHover);
+ipcRenderer.on(getSettingReady, (err, expandOnHover) => {
+  try {
+    if (expandOnHover === true) {
+      let openingTimeout = null;
+      expandButton.addEventListener("mouseleave", () => {
+        clearTimeout(openingTimeout); // if user gets there by accidently, don't expand the screen immediatly
+        openingTimeout = null;
+      });
+      expandButton.addEventListener("mouseenter", () => {
+        openingTimeout = setTimeout(() => {
+          expand();
+        }, 250);
+      });
+    } else {
+      expandButton.addEventListener("click", () => {
         expand();
-      }, 250)
-    });
-  } else if (settings.expandOnHover === false) {
-    expandButton.addEventListener("click", e => {
-      expand();
-    });
+      });
+    }
+  } catch (e) {
+    ipcRenderer.send(systemLog, "Hata: " + e.message);
   }
-
-});
-ipcRenderer.on('items:ready', (err, items) => {
-  ipcRenderer.send('window:expand', items);
 });
 
+ipcRenderer.on("items:ready", (err, items) => {
+  ipcRenderer.send("window:expand", items);
+});
 
 function expand() {
-  const icon = document.getElementById('rocket');
-  icon.classList.add('launch');
+  const icon = document.getElementById("rocket");
+  icon.classList.add("launch");
   ipcRenderer.send("system:scan:programs");
 }

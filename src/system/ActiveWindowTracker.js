@@ -35,7 +35,7 @@ class ActiveWindowTracker {
           }
           if ((response.owner.name !== "Compact Launcher.exe" && response.owner.name !== 'electron.exe' && response.owner.name !== 'Compact Launcher') && this.activeProgram !== response.owner.name) {
             this.activeProgram = response.owner.name;
-            console.log(this.activeProgram)
+            console.log("Foreground Program: "  + this.activeProgram)
           }
         }
 
