@@ -17,7 +17,7 @@ import {
 const expandButton = document.getElementById('expandButton');
 ipcRenderer.send(getSetting, null);
 ipcRenderer.on(getSettingReady, (err, settings) => {
-  if (expandOnHover === true) {
+  if (settings.expandOnHover === true) {
     let openingTimeout = null;
     expandButton.addEventListener("mouseleave", e => {
       console.log(e);
@@ -29,7 +29,7 @@ ipcRenderer.on(getSettingReady, (err, settings) => {
         expand();
       }, 250)
     });
-  } else if (settings[expandOnHover] === false) {
+  } else if (settings.expandOnHover === false) {
     expandButton.addEventListener("click", e => {
       expand();
     });
