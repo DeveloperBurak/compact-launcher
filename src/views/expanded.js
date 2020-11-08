@@ -1,17 +1,25 @@
 import "./system-wide";
 import "../stylesheets/main.css";
 import "../stylesheets/expanded.css";
-import { ipcRenderer } from "electron";
+import {
+  ipcRenderer
+} from "electron";
 import $ from "jquery";
 import * as ipc from "../helpers/ipcActions";
-import { programName } from "../configs/global_variables";
+import {
+  programName
+} from "../configs/global_variables";
 
-import { htmlClassToSelector } from "./../helpers/html";
+import {
+  htmlClassToSelector
+} from "./../helpers/html";
 
 // noinspection JSUnusedLocalSymbols
 const contextMenu = require("jquery-contextmenu");
 const alertify = require("alertifyjs");
-const { dialog } = require("electron").remote;
+const {
+  dialog
+} = require("electron").remote;
 const window = require("electron").remote.getCurrentWindow();
 // noinspection JSUnusedLocalSymbols
 const tooltip = require("bootstrap").Tooltip;
@@ -39,8 +47,7 @@ programListCover
         $(".modal").is(":hidden") &&
         $(".context-menu-list").css("display") === "none"
       ) {
-        programListCover.animate(
-          {
+        programListCover.animate({
             "margin-left": "-" + expandedScene.width() + "px",
           },
           1000,
@@ -59,8 +66,7 @@ $(() => {
   $('[data-toggle="tooltip"]').tooltip();
   const body = $("body");
   expandedScene.css("margin-left", "-" + expandedScene.width() + "px");
-  expandedScene.animate(
-    {
+  expandedScene.animate({
       "margin-left": "+=" + expandedScene.width() + "px",
     },
     500
@@ -163,8 +169,7 @@ $(() => {
             name: "New Image",
             callback: function (key, opt) {
               dialog.showOpenDialog(
-                window,
-                {
+                window, {
                   properties: ["openFile"],
                 },
                 function (file) {
@@ -206,19 +211,19 @@ const renderPrograms = async (programs) => {
   });
 };
 
-const generateList = (list, inner = false) => {
+const generateList = (list, inner = false, level = 1) => {
   let programListCover = $(
     '<li key="' +
-      list.name +
-      '">' +
-      '<button class="' +
-      classDropdownButton +
-      '">' +
-      list.name +
-      "</button>" +
-      "</li>"
+    list.name +
+    '">' +
+    '<button class="' +
+    classDropdownButton +
+    '">' +
+    list.name +
+    "</button>" +
+    "</li>"
   );
-  let programList = $("<ul class=" + classDropdownList + "></ul>");
+  let programList = $("<ul class=" + classDropdownList + " style='padding-left:" + (10 * level) + "px'></ul>");
   if (inner) {
     programList.addClass("inner");
   }
@@ -232,7 +237,7 @@ const generateList = (list, inner = false) => {
   });
   $.each(list, (index, value) => {
     if (value.hasOwnProperty("folder")) {
-      programList.append(generateList(value, true));
+      programList.append(generateList(value, true, level + 1));
     }
   });
   programListCover.append(programList);
