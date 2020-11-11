@@ -211,11 +211,11 @@ const renderPrograms = async (programs) => {
   });
 };
 
-const generateList = (list, inner = false, level = 1) => {
+const generateList = (list, inner = false, level = 0) => {
   let programListCover = $(
     '<li key="' +
     list.name +
-    '">' +
+    '" style="padding-left:' + 20 * level + 'px">' +
     '<button class="' +
     classDropdownButton +
     '">' +
@@ -223,7 +223,7 @@ const generateList = (list, inner = false, level = 1) => {
     "</button>" +
     "</li>"
   );
-  let programList = $("<ul class=" + classDropdownList + " style='padding-left:" + (10 * level) + "px'></ul>");
+  let programList = $("<ul class=" + classDropdownList + " style='padding-left:" + (15 * level) + "px'></ul>");
   if (inner) {
     programList.addClass("inner");
   }
