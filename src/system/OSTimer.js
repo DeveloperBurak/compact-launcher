@@ -1,5 +1,4 @@
 import { lockPC, shutdownPC, sleepPC } from "./System";
-import { isNumber } from "util";
 
 const EE = require("events");
 

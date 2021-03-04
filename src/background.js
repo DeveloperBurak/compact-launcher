@@ -36,11 +36,11 @@ app.on("ready", () => {
   }
 
   getSetting(setting.alwaysOnTop)
-    .then((value) => {
-      if (value == null) {
+    .then((willTracking) => {
+      if (willTracking == null) {
         setSetting(setting.alwaysOnTop, true); // default is true
       }
-      if (value == null || value) {
+      if (willTracking == null || willTracking) {
         startProgramTracking();
       }
     })
