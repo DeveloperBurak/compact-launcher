@@ -1,114 +1,128 @@
-import createWindow from "../helpers/window";
-import scenes from "../configs/scenes.json";
-import url from "url";
-import path from "path";
-import {
-  getSteamUser,
-  renderItem
-} from "../helpers/ipcActions";
-import Steam from "./Steam";
+import path from 'path'
+import url from 'url'
+import scenes from '../configs/scenes.json'
+import { getSteamUser } from '../helpers/ipcActions'
+import createWindow from '../helpers/window'
+import Steam from './Steam'
+import { BrowserWindow } from 'electron'
 
-// these connects windows each other.
-export let appWindows = {
-  mainWindow: null,
-  expandedWindow: null,
-  settingsWindow: null,
-  toolsWindow: null,
-};
-
-export const openCollapsedWindow = () => {
-  appWindows.mainWindow = createWindow("collapsed", scenes.collapsedScreen);
-  appWindows.mainWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, "views/collapsed.html"),
-      protocol: "file:",
-      slashes: true,
-    })
-  );
-  appWindows.mainWindow.on("ready-to-show", () => {
-    appWindows.mainWindow.show();
-    if (scenes.collapsedScreen.hasOwnProperty('devTools')) appWindows.mainWindow.openDevTools();
-    if (appWindows.expandedWindow != null) appWindows.expandedWindow.close();
-  });
-  appWindows.mainWindow.on('closed', () => {
-    appWindows.mainWindow = null;
-  });
-  return appWindows.mainWindow;
-};
-
-export const openExpandedScene = (data) => {
-  appWindows.expandedWindow = createWindow("expanded", scenes.expandedScreen);
-  appWindows.expandedWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, "views/expanded.html"),
-      protocol: "file:",
-      slashes: true,
-    })
-  );
-
-  appWindows.expandedWindow.on("ready-to-show", () => {
-    appWindows.expandedWindow.show();
-    if (scenes.expandedScreen.hasOwnProperty('devTools')) appWindows.expandedWindow.openDevTools();
-    appWindows.expandedWindow.webContents.send(renderItem, data);
-    Steam.getUser().then((user) => {
-      if (user != null && user.account !== false) {
-        appWindows.expandedWindow.webContents.send(getSteamUser, user);
-      }
-    }).catch((message) => {
-      console.log(message);
-    });
-    appWindows.mainWindow.close();
-  });
-  appWindows.expandedWindow.on("closed", () => {
-    appWindows.expandedWindow = null;
-    if (appWindows.mainWindow != null && appWindows.settingsWindow == null && appWindows.toolsWindow == null) {
-      appWindows.mainWindow.show();
+export class WindowHandler {
+  constructor() {
+    this.collapsedWindow = null
+    this.expandedWindow = null
+    this.settingsWindow = null
+    this.toolsWindow = null
+  }
+  openCollapsedWindow = () => {
+    if (this.collapsedWindow == null) {
+      let collapsedWindow = createWindow('collapsed', scenes.collapsedScreen)
+      collapsedWindow.loadURL(
+        url.format({
+          pathname: path.join(__dirname, 'views/collapsed.html'),
+          protocol: 'file:',
+          slashes: true,
+        }),
+      )
+      collapsedWindow.on('ready-to-show', () => {
+        collapsedWindow.show()
+        if (this.expandedWindow != null) this.expandedWindow.close()
+        this.collapsedWindow = collapsedWindow
+      })
+      collapsedWindow.on('closed', () => {
+        this.collapsedWindow = null
+      })
+    } else {
+      this.collapsedWindow.show()
     }
-  });
-  return appWindows.expandedWindow;
-};
-
-// TODO make a system about sub window.
-
-export const openSettingsWindow = () => {
-  if (appWindows.settingsWindow == null) {
-    // scenes.settingsScreen.parent = appWindows.mainWindow ?? appWindows.expandedWindow;
-    appWindows.settingsWindow = createWindow("subSettings", scenes.settingsScreen);
-    appWindows.settingsWindow.loadURL(
-      url.format({
-        pathname: path.join(__dirname, "views/sub/settings.html"),
-        protocol: "file:",
-        slashes: true,
-      })
-    );
-    appWindows.settingsWindow.setMenu(null);
-    appWindows.settingsWindow.on("ready-to-show", () => {
-      appWindows.settingsWindow.show();
-    }).on("closed", () => {
-      appWindows.settingsWindow = null;
-    });
-    if (scenes.settingsScreen.hasOwnProperty('devTools')) appWindows.settingsWindow.openDevTools();
   }
-  return appWindows.settingsWindow;
-};
+  openExpandedWindow = () => {
+    if (this.expandedWindow == null) {
+      let expandedWindow = createWindow('expanded', scenes.expandedScreen)
+      expandedWindow.loadURL(
+        url.format({
+          pathname: path.join(__dirname, 'views/expanded.html'),
+          protocol: 'file:',
+          slashes: true,
+        }),
+      )
 
-export const openToolsWindow = () => {
-  if (appWindows.toolsWindow === null) {
-    appWindows.toolsWindow = createWindow("subTools", scenes.toolsScreen);
-    appWindows.toolsWindow.loadURL(
-      url.format({
-        pathname: path.join(__dirname, "views/sub/tools.html"),
-        protocol: "file:",
-        slashes: true,
+      expandedWindow.on('ready-to-show', () => {
+        Steam.getUser()
+          .then((user) => {
+            if (user != null && user.account !== false) {
+              expandedWindow.webContents.send(getSteamUser, user)
+            }
+          })
+          .catch((message) => {
+            console.log(message)
+          })
+        if (this.collapsedWindow != null) {
+          this.collapsedWindow.close()
+          this.collapsedWindow = null
+        }
+        expandedWindow.show()
       })
-    );
-    appWindows.toolsWindow.setMenu(null);
-    appWindows.toolsWindow.on("ready-to-show", () => {
-      appWindows.toolsWindow.show();
-    }).on("closed", () => {
-      appWindows.toolsWindow = null;
-    });
-    if (typeof scenes.toolsScreen.devTools !== "undefined" && scenes.toolsWindow.devTools) appWindows.toolsWindow.openDevTools();
+      expandedWindow.on('closed', () => {
+        this.expandedWindow = null
+      })
+      this.expandedWindow = expandedWindow
+    } else {
+      expandedWindow.show()
+    }
   }
-  return appWindows.toolsWindow;
-};
+  openSettingsWindow = () => {
+    if (this.settingsWindow == null) {
+      let settingsWindow = createWindow('subSettings', scenes.settingsScreen)
+      settingsWindow.loadURL(
+        url.format({
+          pathname: path.join(__dirname, 'views/sub/settings.html'),
+          protocol: 'file:',
+          slashes: true,
+        }),
+      )
+      settingsWindow.setMenu(null)
+      settingsWindow
+        .on('ready-to-show', () => {
+          this.settingsWindow = settingsWindow
+          if (this.expandedWindow != null) {
+            this.expandedWindow.close()
+            this.expandedWindow = null
+          }
+          settingsWindow.show()
+        })
+        .on('closed', () => {
+          this.settingsWindow = null
+        })
+    } else {
+      this.settingsWindow.show()
+    }
+  }
+  openToolsWindow = () => {
+    if (this.toolsWindow === null) {
+      let toolsWindow = createWindow('subTools', scenes.toolsScreen)
+      toolsWindow.loadURL(
+        url.format({
+          pathname: path.join(__dirname, 'views/sub/tools.html'),
+          protocol: 'file:',
+          slashes: true,
+        }),
+      )
+      toolsWindow.setMenu(null)
+      toolsWindow
+        .on('ready-to-show', () => {
+          this.toolsWindow = toolsWindow
+          if (this.expandedWindow != null) {
+            this.expandedWindow.close()
+            this.expandedWindow = null
+          }
+          toolsWindow.show()
+        })
+        .on('closed', () => {
+          this.toolsWindow = null
+        })
+    }
+  }
+  getCurrentWindow = () => {
+    return BrowserWindow.getFocusedWindow()
+  }
+}

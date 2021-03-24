@@ -1,4 +1,4 @@
-import File from "./File";
+import FileManager from "./FileManager";
 import {fileExists, removeFile} from "../helpers/file";
 
 const fs = require('fs');
@@ -7,7 +7,7 @@ const path = require('path');
 class Program {
 
   addNewImage(source, name) {
-    const image = path.join(File.get('images'), name + '.jpg');
+    const image = path.join(FileManager.get('images'), name + '.jpg');
     fileExists(image).then(async exists => {
       if (exists) {
         await removeFile(image);

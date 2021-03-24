@@ -1,4 +1,4 @@
-import File from "./File";
+import FileManager from "./FileManager";
 import {
   fileExists,
   readVdf
@@ -20,7 +20,7 @@ class Steam {
   }
 
   setSteamUserFilePath() { // we cant set in constructor
-    this.steamUserFile = File.get('userdata') + '/steam.json';
+    this.steamUserFile = FileManager.get('userdata') + '/steam.json';
   }
 
   async getInstalledPath() {

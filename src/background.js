@@ -1,53 +1,43 @@
-import {
-  app
-} from "electron";
+import { app } from 'electron'
+import { devLog } from './helpers/console'
+import { isLinux, isWindows } from './helpers/os'
+import * as setting from './helpers/settingKeys'
+import './main/ipcSystemHandler'
+import './main/ipcWindowHandler'
+import FileManager from './system/FileManager'
+import { PreferenceManager } from './system/PreferenceManager'
+import { setTray, startProgramTracking } from './system/System'
+import { WindowHandler } from './system/WindowHandler'
 
-import File from "./system/File";
-import * as windows from "./system/WindowHandler";
-import {
-  setTray,
-  startProgramTracking,
-  getSetting,
-  setSetting,
-} from "./system/System";
-import * as setting from "./helpers/settingKeys";
-import "./main/ipcSystemHandler";
-import "./main/ipcWindowHandler";
+export const WindowHandlerObj = new WindowHandler()
+export const PreferenceManagerObj = new PreferenceManager()
 
-if (process.platform === "linux") {
-  app.commandLine.appendSwitch("enable-transparent-visuals");
-  app.commandLine.appendSwitch("disable-gpu");
+if (isLinux() || isWindows()) {
+  app.commandLine.appendSwitch('enable-transparent-visuals')
+  app.commandLine.appendSwitch('disable-gpu')
 }
-// windows
-let tray;
 
+export let tray // system tray
 
-app.on("ready", () => {
-  windows.appWindows.mainWindow = windows.openCollapsedWindow();
-  // appWindows.toolsWindow = openToolsWindow();
-  // appWindows.settingsWindow = openSettingsWindow();
-  File.createRequiredFolders();
-
+app.on('ready', () => {
+  WindowHandlerObj.openCollapsedWindow()
+  FileManager.createRequiredFolders()
   try {
     // it may throw exception on linux
-    tray = setTray();
+    tray = setTray()
   } catch (e) {
-    console.log(e);
+    devLog(e)
   }
 
-  getSetting(setting.alwaysOnTop)
-    .then((willTracking) => {
-      if (willTracking == null) {
-        setSetting(setting.alwaysOnTop, true); // default is true
-      }
-      if (willTracking == null || willTracking) {
-        startProgramTracking();
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-});
-app.on("window-all-closed", () => {
-  windows.appWindows.mainWindow = windows.openCollapsedWindow();
-});
+  const alwaysOnTop = PreferenceManagerObj.getSetting(setting.alwaysOnTop)
+  if (alwaysOnTop == null) {
+    PreferenceManagerObj.setSetting(setting.alwaysOnTop, true) // default is true
+  }
+  if (alwaysOnTop == null || alwaysOnTop) {
+    startProgramTracking()
+  }
+})
+
+app.on('window-all-closed', () => {
+  WindowHandlerObj.openCollapsedWindow()
+})

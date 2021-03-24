@@ -1,16 +1,16 @@
 import {fileExists} from "../helpers/file";
-import File from "./File";
+import FileManager from "./FileManager";
 
 const fs = require('fs');
 const path = require('path');
 const activeWin = require('active-win');
 
-class ActiveWindowTracker {
+class ForegroundProgramTracker {
 
   constructor() {
     this.forbiddenApps = [];
     this.activeProgram = null;
-    this.forbiddenProgramsFile = path.join(File.get('userdata'), 'forbidden-programs.json');
+    this.forbiddenProgramsFile = path.join(FileManager.get('userdata'), 'forbidden-programs.json');
     this.tracking = null;
     fileExists(this.forbiddenProgramsFile).then(result => {
       if (!result) {
@@ -78,4 +78,4 @@ class ActiveWindowTracker {
 }
 
 
-export default new ActiveWindowTracker();
+export default new ForegroundProgramTracker();

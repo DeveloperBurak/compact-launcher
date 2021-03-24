@@ -2,9 +2,9 @@ import {app, BrowserWindow, Menu, Tray} from "electron";
 import path from "path";
 import {trayMenuTemplate} from "../menu/tray_menu_template";
 import {programName} from "../configs/global_variables";
-import ActiveWindowTracker from "./ActiveWindowTracker";
+import ForegroundProgramTracker from "./ForegroundProgramTracker";
 import * as setting from "../helpers/settingKeys";
-import File from "./File";
+import FileManager from "./FileManager";
 import {fileExists} from "../helpers/file";
 import execute from "../helpers/execute";
 
@@ -40,7 +40,7 @@ export const setAutoLaunch = (enabled = true) => { // auto launch the program on
 };
 
 export const startProgramTracking = () => {
-  ActiveWindowTracker.start((isForbidden) => {
+  ForegroundProgramTracker.start((isForbidden) => {
     BrowserWindow.getAllWindows().filter((window) => {
       window.setAlwaysOnTop(!isForbidden);
     });
@@ -48,51 +48,8 @@ export const startProgramTracking = () => {
 };
 
 export const stopProgramTracking = () => {
-  ActiveWindowTracker.stop();
+  ForegroundProgramTracker.stop();
 };
-
-
-export const setSetting = (name, value) => {
-  const settingPath = File.get("userdata") + "/settings.json";
-
-  fileExists(settingPath).then((result) => {
-    if (!result) {
-      fs.writeFileSync(settingPath, {});
-    }
-    let settings = {};
-    fs.readFile(settingPath, (err, data) => {
-      settings = JSON.parse(data.toString("utf8"));
-      settings[name] = value;
-      fs.writeFileSync(settingPath, JSON.stringify(settings));
-    });
-  }).catch(error => {
-    console.log(error)
-  });
-};
-
-export const getSetting = (name) => {
-  const settingPath = File.get("userdata") + "/settings.json";
-  return new Promise((resolve, reject) => {
-    fileExists(settingPath).then((result) => {
-      if (!result) {
-        fs.writeFileSync(settingPath, JSON.stringify({}));
-        resolve(null);
-      } else {
-        fs.readFile(settingPath, async (err, data) => {
-          let settings = await JSON.parse(data.toString("utf8"));
-          if (name === null) {
-            resolve(settings);
-          } else {
-            resolve(settings[name]);
-          }
-        });
-      }
-    }).catch(error => {
-      reject(error)
-    });
-  });
-};
-
 
 export const shutdownPC = () => {
   switch (process.platform) {

@@ -1,4 +1,4 @@
-import "./system-wide";
+import "./app";
 import "../stylesheets/main.css";
 import "../stylesheets/sub-windows.css";
 import "../components/number-input.js";

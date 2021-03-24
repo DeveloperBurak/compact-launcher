@@ -2,51 +2,48 @@
 // them in that place after app relaunch).
 // Can be used for more than one window, just construct many
 // instances of it and give each different name.
-
-import { BrowserWindow, screen } from "electron";
-import { getSetting } from "../system/System";
-import * as setting from "./settingKeys";
+import { BrowserWindow, screen } from 'electron'
+import env from 'env'
+import { PreferenceManagerObj } from '../background'
+import { isLinux, isWindows } from './os'
+import * as setting from './settingKeys'
 
 export default (name, options) => {
-  let win;
+  let win = null
+  let windowOptions = {
+    frame: options.frame ?? false,
+    transparent: options.transparent ?? false,
+    useContentSize: options.useContentSize ?? false,
+    skipTaskbar: options.skipTaskbar ?? true,
+    resizable: options.resizable ?? false,
+    show: options.show ?? false,
+    center: options.center ?? null,
+    width: options.width ?? screen.getPrimaryDisplay().size.width,
+    height: options.height ?? screen.getPrimaryDisplay().size.height,
+    webPreferences: { contextIsolation: false, enableRemoteModule: true, nodeIntegration: true }, // TODO security hole. change there
+  }
 
-  // default assigning
-  options.frame = options.frame ?? false;
-  options.transparent = options.transparent ?? false;
-  options.useContentSize = options.useContentSize ?? false;
-  options.alwaysOnTop = options.alwaysOnTop ?? false;
-  options.skipTaskbar = options.skipTaskbar ?? true;
-  options.resizable = options.resizable ?? false;
-  options.show = options.show ?? false;
-  options.webPreferences = { nodeIntegration: true };
-  getSetting(setting.alwaysOnTop).then((value) => {
-    if (value != null) {
-      options.alwaysOnTop = value;
+  if (options.type == 'toolbar') {
+    if (isWindows() || isLinux()) {
+      windowOptions.type = options.type
     }
-  }).catch(error => {
-    console.log(error)
-  });
-  if (options.center == null) {
-    options.x = options.x ?? 0;
-    options.y = options.y ?? 0;
   }
-
-  if (options.width == null && options.height == null) {
-    const { width } = screen.getPrimaryDisplay().size;
-    options.width = width;
+  const alwaysOnTop = PreferenceManagerObj.getSetting(setting.alwaysOnTop)
+  if (alwaysOnTop != null) {
+    windowOptions.alwaysOnTop = alwaysOnTop
+  } else if (options.alwaysOnTop) {
+    windowOptions.alwaysOnTop = options.alwaysOnTop
   }
-  if(options.height == null){
-    const { height } = screen.getPrimaryDisplay().size;
-    options.height = height;
+  if (windowOptions.center == null) {
+    windowOptions.x = options.x ?? 0
+    windowOptions.y = options.y ?? 0
   }
-  win = new BrowserWindow(Object.assign({}, options));
-  const additionalTitle = options.title != null ? " - " + options.title : null;
-  win.setTitle("Compact Launcher" + additionalTitle);
-  win.setSize(options.width, options.height);
-  if (options.x && options.y) {
-    win.setPosition(options.x, options.y);
+  win = new BrowserWindow(windowOptions)
+  const additionalTitle = options.title != null ? ' - ' + options.title : ''
+  win.setTitle('Compact Launcher' + additionalTitle)
+  win.setSkipTaskbar(options.skipTaskbar)
+  if (options.devTools && env.name === 'development') {
+    win.webContents.openDevTools({ mode: 'undocked' })
   }
-  win.setAlwaysOnTop(options.alwaysOnTop);
-  win.setSkipTaskbar(options.skipTaskbar);
-  return win;
-};
+  return win
+}

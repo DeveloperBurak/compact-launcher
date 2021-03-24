@@ -1,113 +1,99 @@
-import * as ipc from "../helpers/ipcActions";
-import {
-  app,
-  ipcMain
-} from "electron";
-import Store from "electron-store";
-import Program from "../system/Program";
-import OSTimer from "../system/OSTimer";
-import Steam from "../system/Steam";
-import {
-  cacheProgramHTML
-} from "../configs/global_variables";
-import {
-  removeFile
-} from '../helpers/file';
-import {
-  startProgramTracking,
-  stopProgramTracking,
-  setSetting,
-  setAutoLaunch
-} from '../system/System';
-import * as setting from "../helpers/settingKeys";
-let store = new Store();
+import * as ipc from '../helpers/ipcActions'
+import { app, ipcMain } from 'electron'
+import Program from '../system/Program'
+import OSTimer from '../system/OSTimer'
+import Steam from '../system/Steam'
+import { cacheProgramHTML } from '../configs/global_variables'
+import { removeFile } from '../helpers/file'
+import { startProgramTracking, stopProgramTracking, setSetting, setAutoLaunch } from '../system/System'
+import * as setting from '../helpers/settingKeys'
+import FileManager from '../system/FileManager'
+import { devLog } from '../helpers/console'
+import StoreManager from '../system/StoreManager'
+import { PreferenceManagerObj } from '../background'
 
-const version = Number.parseFloat(app.getVersion());
 ipcMain.on(ipc.cacheScannedPrograms, (err, cache) => {
-  store.set("app.version", version); // TODO dont set this in there.
-  store.set(cacheProgramHTML, cache.html);
-});
+  StoreManager.set('app.version', Number.parseFloat(app.getVersion()))
+  StoreManager.setProgramListCache(cache.html)
+})
 
 ipcMain.on(ipc.systemLog, (err, value) => {
-  console.log(value);
-});
+  devLog(value)
+})
 
 ipcMain.on(ipc.removeProgramCache, () => {
-  store.delete(cacheProgramHTML);
-});
-
-if (version !== store.get("app.version") || version < 0.4) {
-  store.delete(cacheProgramHTML);
-}
+  StoreManager.deleteProgramListCache()
+})
 
 ipcMain.on(ipc.removeProgram, (err, path) => {
   removeFile(path).then((deleted) => {
     if (deleted) {
-      store.delete(cacheProgramHTML);
+      StoreManager.delete(cacheProgramHTML)
     }
-  });
-});
+  })
+})
 
 ipcMain.on(ipc.removeImageFromProgram, (err, imagePath) => {
   removeFile(imagePath).then((deleted) => {
     if (deleted) {
-      store.delete(cacheProgramHTML);
+      StoreManager.delete(cacheProgramHTML)
     }
-  });
-});
+  })
+})
 
 ipcMain.on(ipc.addImageFromProgram, (err, items) => {
-  Program.addNewImage(items.file, items.name);
-});
+  Program.addNewImage(items.file, items.name)
+})
 
 ipcMain.on(ipc.getUserAnswer, (err, response) => {
-  Steam.setUser(response);
-});
+  Steam.setUser(response)
+})
 
 ipcMain.on(ipc.disableShutdown, () => {
-  cancelShutDown();
-});
+  cancelShutDown()
+})
 
 ipcMain.on(ipc.timerStarted, (err, data) => {
-  OSTimer.startTimer(data.time, data.action);
-});
-
+  OSTimer.startTimer(data.time, data.action)
+})
 
 ipcMain.on(ipc.timerSetTime, (err, data) => {
-  OSTimer.clearTime();
-  OSTimer.startTimer(data.timeLeft, data.action);
-});
+  OSTimer.clearTime()
+  OSTimer.startTimer(data.timeLeft, data.action)
+})
 
 ipcMain.on(ipc.timerStopped, () => {
-  OSTimer.clearTime();
-});
+  OSTimer.clearTime()
+})
 
 ipcMain.on(ipc.setAutoLaunch, (err, enabled) => {
-  setAutoLaunch(enabled);
-});
+  setAutoLaunch(enabled)
+})
 
 ipcMain.on(ipc.setSetting, (err, payload) => {
-  setSetting(setting[payload.key], payload.value);
-});
+  PreferenceManagerObj.setSetting(payload.key, payload.value)
+})
 
 ipcMain.on(ipc.setAlwaysOnTop, (err, enabled) => {
   if (enabled) {
-    startProgramTracking();
+    startProgramTracking()
   } else {
-    stopProgramTracking();
+    stopProgramTracking()
   }
-});
+})
 
+ipcMain.on(ipc.moveFile, (err, files) => {
+  for (let file of files) {
+    FileManager.moveToShortcutsFolder(file)
+  }
+})
 
 ipcMain.on(ipc.disconnectUser, (err, data) => {
   switch (data.platform) {
     case 'steam':
-      Steam.disconnectUser();
-      break;
+      Steam.disconnectUser()
+      break
     default:
-      throw new Error("Invalid Platform");
+      throw new Error('Invalid Platform')
   }
-});
-
-
-exports.store = store;
+})

@@ -1,77 +1,42 @@
-import File from "./File";
+import FileManager from "./FileManager";
 import { scan } from "../helpers/folder";
 import execute from "../helpers/execute";
 import path from "path";
 const fs = require("fs");
 
 class ProgramHandler {
-  constructor() {
-    this.programs = {};
-  }
-
-  async readShortcutFolder() {
-    await scan(File.get("shortcuts")).then(async (data) => {
-      await this.generateProgram(data).then((processedData) => {
-        if (processedData.Uncategorized.programs.length === 0) {
-          delete processedData.Uncategorized;
-        }
-        this.programs["categories"] = processedData;
-      });
-    });
-    return this.programs;
-  }
-
-  async generateProgram(data = {}, hasCategory = false) {
-    let count = 0;
-    if (!hasCategory) {
-      data["Uncategorized"] = {
-        name: "Uncategorized",
-        programs: [],
-        manipulated: true,
-      };
+  async getList(type = "json") {
+    if (type === "html") {
+      // TODO html converter
+      const list = await this.readProgramsFromShortcutsFolder();
+      
+    } else if (type === "json") {
+      return await this.readProgramsFromShortcutsFolder();
     }
-    for (let item in data) {
-      if (data[item].hasOwnProperty("file") && data[item].file === true) {
-        if (!hasCategory) {
-          data["Uncategorized"]["programs"][count] = Object.assign(
-            data[count],
-            {
-              image: path.join(
-                File.get("images"),
-                data[count]["name"] + ".jpg"
-              ),
-              exePath: data[count]["fullpath"],
-            }
-          );
-        } else {
-          if (typeof data["programs"] == "undefined") {
-            data["programs"] = {};
-          }
-          data["programs"][count] = Object.assign(data[count], {
-            image: path.join(File.get("images"), data[count]["name"] + ".jpg"),
-            exePath: data[count]["fullpath"],
-          });
+  }
+
+  async readProgramsFromShortcutsFolder() {
+    const items = await scan(FileManager.get("shortcuts"));
+    let list = [];
+    let uncategorized;
+    for (let item of items) {
+      if (item.hasOwnProperty("file")) {
+        if (!(uncategorized instanceof Category)) {
+          uncategorized = new Category("Uncategorized");
         }
-        delete data[count];
-        count++;
-      } else if (
-        Object.keys(data[item]).length >= 1 &&
-        typeof data[item]["programs"] == "undefined"
-      ) {
-        data[item] = await this.generateProgram(data[item], true);
-        data[item]["name"] = item;
+        uncategorized.add(item);
+      } else if (item.hasOwnProperty("folder")) {
+        list.push(new Category(item.name, item.items));
       }
     }
-    return data;
+    if (uncategorized != null) list.push(uncategorized);
+    return list;
   }
 
   launch(file) {
     this.prepareCommand(file).then((command) => {
-      console.log(command);
       if (command != null) {
-        execute(command, (output) => {
-          console.log(output);
-        });
+        execute(command);
       }
     });
   }
@@ -111,6 +76,43 @@ class ProgramHandler {
         reject("OS not supported");
       }
     });
+  }
+}
+
+class Category {
+  constructor(name, items) {
+    this.name = name;
+    this.items = [];
+    if (items != null) {
+      for (let item of items) {
+        this.add(item);
+      }
+    }
+  }
+  add(item) {
+    if (item instanceof Program) {
+      this.items.push(item);
+    } else {
+      if (item.hasOwnProperty("file") && item.file === true) {
+        this.items.push(new Program(item));
+      } else if (item.hasOwnProperty("folder") && item.folder === true) {
+        this.items.push(new Category(item.name, item.items));
+      }
+    }
+  }
+}
+
+class Program {
+  constructor(item) {
+    if (item !== null && item.hasOwnProperty("file") && item.file === true) {
+      this.name = item["name"];
+      this.ext = item["ext"];
+      this.image = path.join(FileManager.get("images"), item["name"] + ".jpg");
+      this.exePath = item["fullpath"];
+    } else {
+      console.log("incompatible");
+      throw new Error(file);
+    }
   }
 }
 

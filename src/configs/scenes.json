@@ -4,11 +4,12 @@
     "height": 15,
     "transparent": false,
     "type": "toolbar",
-    "alwaysOnTop": true
+    "devTools": false
   },
   "expandedScreen": {
     "transparent": true,
-    "alwaysOnTop": true
+    "alwaysOnTop": false,
+    "devTools": true
   },
   "steamDialogue": {
     "width": 500,
@@ -26,7 +27,8 @@
     "titleBarStyle": "hidden",
     "modal": true,
     "title": "Settings",
-    "skipTaskbar": false
+    "skipTaskbar": false,
+    "devTools": true
   },
 
   "toolsScreen": {
@@ -38,6 +40,7 @@
     "modal": true,
     "parent": "top",
     "title": "Tools",
-    "skipTaskbar": false
+    "skipTaskbar": false,
+    "devTools": true
   }
 }

@@ -1,15 +1,15 @@
-import { lockPC, shutdownPC, sleepPC } from "./System";
+import { lockPC, shutdownPC, sleepPC } from './System'
 
-const EE = require("events");
+const EE = require('events')
 
 // OS Action(like sleep, shutdown etc.) Timer
 class OSTimer {
   constructor() {
-    EE.call(this);
-    this.remainingTime = 0;
-    this.timerInterval = null;
-    this.action = null; // the action when time is up
-    this.nearTimeTreshold = 3; // (in minute)
+    EE.call(this)
+    this.remainingTime = 0
+    this.timerInterval = null
+    this.action = null // the action when time is up
+    this.nearTimeTreshold = 3 // (in minute)
   }
 
   /**
@@ -20,27 +20,29 @@ class OSTimer {
    */
   startTimer(time, action) {
     //
-    if (time == null || action == null || typeof time !== "number") {
-      return false;
+    if (time == null || action == null || typeof time !== 'number') {
+      return false
     }
-    let timeTresholdReached = false;
-    this.remainingTime = time;
-    this.action = action;
+    let timeTresholdReached = false
+    this.remainingTime = time
+    this.action = action
+    this.emit('osTimer-notify')
+
     if (time > 1) {
       if (this.timerInterval === null) {
         this.timerInterval = setInterval(async () => {
-          this.remainingTime -= 1;
+          this.remainingTime -= 1
           if (!timeTresholdReached) {
             if (this.remainingTime / 60 === this.nearTimeTreshold) {
-              timeTresholdReached = true;
-              this.emit("time-near");
+              timeTresholdReached = true
+              this.emit('osTimer-notify')
             }
           }
           if (this.remainingTime <= 0) {
-            await this.runAction();
-            this.clearTime();
+            await this.runAction()
+            this.clearTime()
           }
-        }, 1000);
+        }, 1000)
       }
     }
   }
@@ -49,53 +51,44 @@ class OSTimer {
    * @returns {object}
    */
   getNotification() {
-    let notification;
+    let notification
     switch (this.action) {
-      case "shutdown":
+      case 'shutdown':
         notification = {
-          title: "Remainder",
-          body:
-            "Pc is shutting down in " +
-            Math.ceil(this.remainingTime / 60) +
-            " minute",
-        };
-        break;
-      case "sleep":
+          title: 'Remainder',
+          body: 'Pc is shutting down in ' + Math.ceil(this.remainingTime / 60) + ' minute',
+        }
+        break
+      case 'sleep':
         notification = {
-          title: "Remainder",
-          body:
-            "Pc will go to sleep in " +
-            Math.ceil(this.remainingTime / 60) +
-            " minute",
-        };
-        break;
-      case "lock":
+          title: 'Remainder',
+          body: 'Pc will go to sleep in ' + Math.ceil(this.remainingTime / 60) + ' minute',
+        }
+        break
+      case 'lock':
         notification = {
-          title: "Remainder",
-          body:
-            "Pc will be locked in " +
-            Math.ceil(this.remainingTime / 60) +
-            " minute",
-        };
-        break;
+          title: 'Remainder',
+          body: 'Pc will be locked in ' + Math.ceil(this.remainingTime / 60) + ' minute',
+        }
+        break
     }
-    return notification;
+    return notification
   }
   /**
    * @returns {void}
    */
   clearTime() {
-    clearInterval(this.timerInterval);
-    this.timerInterval = null;
-    this.remainingTime = 0;
-    this.action = null;
+    clearInterval(this.timerInterval)
+    this.timerInterval = null
+    this.remainingTime = 0
+    this.action = null
   }
 
   /**
    * @returns {number}
    */
   getRemainingTime() {
-    return this.remainingTime;
+    return this.remainingTime
   }
 
   /**
@@ -104,18 +97,18 @@ class OSTimer {
   runAction() {
     // TODO add restart
     switch (this.action) {
-      case "shutdown":
-        shutdownPC();
-        break;
-      case "sleep":
-        sleepPC();
-        break;
-      case "lock":
-        lockPC();
-        break;
+      case 'shutdown':
+        shutdownPC()
+        break
+      case 'sleep':
+        sleepPC()
+        break
+      case 'lock':
+        lockPC()
+        break
     }
   }
 }
 
-OSTimer.prototype.__proto__ = EE.EventEmitter.prototype;
-export default new OSTimer();
+OSTimer.prototype.__proto__ = EE.EventEmitter.prototype // bind the event to this class
+export default new OSTimer()

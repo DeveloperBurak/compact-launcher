@@ -1,35 +1,34 @@
-import { app } from "electron";
-import ActiveWindowTracker from "../system/ActiveWindowTracker";
-import { openSettingsWindow } from "../system/WindowHandler";
-
+import { app } from 'electron'
+import ForegroundProgramTracker from '../system/ForegroundProgramTracker'
+import { WindowHandlerObj } from '../background'
 export const trayMenuTemplate = [
   {
-    label: "Foreground Program",
+    label: 'Foreground Program',
     submenu: [
       {
-        label: "Add to Blacklist",
+        label: 'Add to Blacklist',
         click: () => {
-          ActiveWindowTracker.addProgram();
+          ForegroundProgramTracker.addProgram()
         },
       },
       {
-        label: "Remove From Blacklist",
+        label: 'Remove From Blacklist',
         click: () => {
-          ActiveWindowTracker.removeProgram();
+          ForegroundProgramTracker.removeProgram()
         },
       },
-    ]
+    ],
   },
   {
-    label: "Settings",
+    label: 'Settings',
     click: () => {
-      openSettingsWindow();
+      WindowHandlerObj.openSettingsWindow()
     },
   },
   {
-    label: "Exit",
+    label: 'Exit',
     click: () => {
-      app.quit();
+      app.quit()
     },
   },
-];
+]
