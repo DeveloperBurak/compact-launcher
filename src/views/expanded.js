@@ -1,16 +1,17 @@
-import './app'
-import '../stylesheets/main.css'
-import '../stylesheets/expanded.css'
-import { ipcRenderer } from 'electron'
-import $ from 'jquery'
-import * as ipc from '../helpers/ipcActions'
-import { programName } from '../configs/global_variables'
-import { Tooltip } from 'bootstrap'
-import { htmlClassToSelector } from './../helpers/html'
-import { remote } from 'electron'
-import contextMenu from 'jquery-contextmenu'
 import { alertify } from 'alertifyjs'
+import { ipcRenderer, remote } from 'electron'
+import $ from 'jquery'
+import { APP_NAME } from '../configs/app.json'
+import { isDev } from '../helpers/env'
+import * as ipc from '../strings/ipc'
+import '../stylesheets/expanded.css'
+import '../stylesheets/main.css'
+import './app'
 const window = remote.getCurrentWindow()
+
+// vscode cant detect we use it, so use require. if we dont, vscode delete these imports when optimizing import
+const contextMenu = require('jquery-contextmenu')
+const tooltip = require('bootstrap').Tooltip
 
 const programPreviewContainer = $('#program-preview-container')
 const expandedScene = $('#expandedScene')
@@ -18,18 +19,7 @@ const programContainer = $('#program-container')
 const programListCover = $('#program-list')
 const authButtons = $('.btn-auth-program')
 
-// class names of elements that generated later
-const classProgramCover = 'program-cover'
-const classDeleteProgramButton = 'btn delete-program'
-const classProgramButton = 'btn program'
-
 let closingTimeOut = null
-
-const renderPrograms = async (programs) => {
-  $.each(programs, (index, value) => {
-    programContainer.append(generateList(value))
-  })
-}
 
 ipcRenderer.on(ipc.getSteamUser, (e, user) => {
   $('#user-name').html('Welcome, ' + user.account.persona)
@@ -38,19 +28,11 @@ ipcRenderer.on(ipc.getSteamUser, (e, user) => {
   button.attr('disabled', true)
 })
 
-ipcRenderer
-  .invoke(ipc.getProgramsHTML)
-  .then((html) => {
-    programContainer.html('')
-    programContainer.append(html)
-  })
-  .catch()
-
 ipcRenderer.on(ipc.isSteamUserExists, (e, exists) => {
   if (exists) {
     alertify
       .confirm(
-        programName,
+        APP_NAME,
         'Steam Found. Do you want to add recent user?',
         () => {
           ipcRenderer.send(ipc.getUserAnswer, true)
@@ -68,31 +50,33 @@ ipcRenderer.on(ipc.isSteamUserExists, (e, exists) => {
   }
 })
 
-// User UI behavours
-programListCover
-  .on('mouseleave', (e) => {
-    closingTimeOut = setTimeout(() => {
-      if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
-        programListCover.animate(
-          {
-            'margin-left': '-' + expandedScene.width() + 'px',
-          },
-          1000,
-          () => {
-            ipcRenderer.send(ipc.closeExpandWindow)
-          },
-        )
-      }
-    }, 350)
+// User behavours
+$(() => {
+  renderList()
+  programListCover.on('mouseleave', (e) => {
+    closingTimeOut = setTimeout(
+      () => {
+        if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
+          programListCover.animate(
+            {
+              'margin-left': '-' + expandedScene.width() + 'px',
+            },
+            1000,
+            () => {
+              ipcRenderer.send(ipc.closeExpandWindow)
+            },
+          )
+        }
+      },
+      isDev() ? 35000 : 350,
+    )
   })
-  .on('mouseenter', (e) => {
+  programListCover.on('mouseenter', (e) => {
     clearTimeout(closingTimeOut)
   })
-
-$(() => {
   $('[data-toggle="tooltip"]').tooltip()
   expandedScene.css('margin-left', '-' + expandedScene.width() + 'px') // init animation
-  expandedScene.animate({ 'margin-left': '+=' + expandedScene.width() + 'px' }, 500) // init animation
+  expandedScene.animate({ 'margin-left': '+=' + expandedScene.width() + 'px' }, 250) // init animation
 
   $('.btn-disconnect-user').on('click', (e) => {
     const button = e.currentTarget
@@ -106,8 +90,7 @@ $(() => {
   })
 
   $('.btn-refresh-programs').on('click', () => {
-    ipcRenderer.send(ipc.removeProgramCache)
-    ipcRenderer.send(ipc.closeExpandWindow)
+    renderList({ refreshCache: true })
   })
 
   $('#btn-openSettingsWindow').on('click', function () {
@@ -136,39 +119,37 @@ $(() => {
       button.removeClass('active')
     }
   })
-  body
-    .on('mouseenter', htmlClassToSelector(classProgramCover), (e) => {
-      const cover = $(e.currentTarget)
-      const button = cover.children(htmlClassToSelector(classProgramButton))
-      programPreviewContainer.removeClass('appearing')
-      programPreviewContainer.children('img').attr('src', button.attr('image'))
-      if (button.attr('image') != null) {
-        programPreviewContainer.removeClass('d-none')
-        programPreviewContainer.addClass('appearing')
-      } else {
-        programPreviewContainer.addClass('d-none')
-      }
-      cover.children(htmlClassToSelector(classDeleteProgramButton)).show()
-    })
-    .on('mouseleave', htmlClassToSelector(classProgramCover), (e) => {
-      const cover = $(e.currentTarget)
-      programPreviewContainer.removeClass('appearing')
-      cover.children(htmlClassToSelector(classDeleteProgramButton)).hide()
-    })
-
-  programPreviewContainer.on('webkitAnimationEnd animationend', () => {
+  body.on('mouseenter', '.program-cover', (e) => {
+    const cover = $(e.currentTarget)
+    const button = cover.children('.btn.program')
     programPreviewContainer.removeClass('appearing')
+    programPreviewContainer.children('img').attr('src', button.attr('image'))
+    if (button.attr('image') != null) {
+      programPreviewContainer.removeClass('d-none')
+      programPreviewContainer.addClass('appearing')
+    } else {
+      programPreviewContainer.addClass('d-none')
+    }
+    cover.children('.btn.delete-program').show()
   })
-  body.on('click', htmlClassToSelector(classDeleteProgramButton), (e) => {
+  body.on('mouseleave', '.program-cover', (e) => {
+    const cover = $(e.currentTarget)
+    programPreviewContainer.removeClass('appearing')
+    cover.children('.btn.delete-program').hide()
+  })
+
+  body.on('click', '.btn.delete-program', (e) => {
     const button = $(e.currentTarget)
     ipcRenderer.send(ipc.removeProgram, button.attr('del'))
     button.parent().remove() // TODO check is deleted for more stability
   })
-  body.on('click', htmlClassToSelector(classProgramButton), (e) => {
+  body.on('click', '.btn.program', (e) => {
     const button = $(e.currentTarget)
     ipcRenderer.send(ipc.launchProgram, button.attr('execute'))
   })
-
+  programPreviewContainer.on('webkitAnimationEnd animationend', () => {
+    programPreviewContainer.removeClass('appearing')
+  })
   $('.btn-user').on('click', () => {
     $('.modal.user').show()
     authButtons.each((index, authButton) => {
@@ -182,22 +163,20 @@ $(() => {
     const button = $(e.currentTarget)
     button.closest('.modal').hide()
   })
-  authButtons
-    .on('mouseenter', (e) => {
-      const button = $(e.currentTarget)
-      if (button.attr('authorized') !== true) {
-        button.find('path').attr('fill', button.find('path').attr('secondary'))
-      }
-    })
-    .on('mouseleave', (e) => {
-      const button = $(e.currentTarget)
-      if (button.attr('authorized') !== true) {
-        button.find('path').attr('fill', button.find('path').attr('primary'))
-      }
-    })
-
+  authButtons.on('mouseenter', (e) => {
+    const button = $(e.currentTarget)
+    if (button.attr('authorized') !== true) {
+      button.find('path').attr('fill', button.find('path').attr('secondary'))
+    }
+  })
+  authButtons.on('mouseleave', (e) => {
+    const button = $(e.currentTarget)
+    if (button.attr('authorized') !== true) {
+      button.find('path').attr('fill', button.find('path').attr('primary'))
+    }
+  })
   $.contextMenu({
-    selector: htmlClassToSelector(classProgramCover),
+    selector: '.program-cover',
     items: {
       image: {
         name: 'Image',
@@ -212,7 +191,7 @@ $(() => {
                 },
                 function (file) {
                   if (file !== undefined) {
-                    const button = $(opt.$trigger).children(htmlClassToSelector(classProgramButton))
+                    const button = $(opt.$trigger).children('.btn.program')
                     ipcRenderer.send(ipc.addImageFromProgram, {
                       file: file[0],
                       name: button.attr('programName'),
@@ -225,7 +204,7 @@ $(() => {
           remove: {
             name: 'Remove',
             callback: (key, opt) => {
-              const button = $(opt.$trigger).children(htmlClassToSelector(classProgramButton))
+              const button = $(opt.$trigger).children('.btn.program')
               const imagePath = button.attr('image')
               // TODO check is deleted for more stability
               ipcRenderer.send(ipc.removeImageFromProgram, imagePath)
@@ -238,3 +217,15 @@ $(() => {
     },
   })
 })
+
+
+function renderList(payload = {}) {
+  programContainer.html('')
+  // TODO loading animation
+  setTimeout(() => {
+    ipcRenderer.invoke(ipc.getProgramsHTML, payload).then((html) => {
+      programContainer.append(html)
+      $('.dropdown-list').hide()
+    })
+  }, 10) // Make feel that the list is refreshed to user
+}

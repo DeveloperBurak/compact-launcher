@@ -1,10 +1,8 @@
 import { ipcMain } from 'electron'
-import { PreferenceManagerObj, WindowHandlerObj } from '../background'
-import * as ipc from '../helpers/ipcActions'
-import OSTimer from '../system/OSTimer'
-import ProgramHandler from '../system/ProgramHandler'
+import { ListUIObj, PreferenceManagerObj, ProgramHandlerObj, StoreManagerObj, WindowHandlerObj } from '../background'
+import * as ipc from '../strings/ipc'
+import Timer from '../system/Timer'
 import User from '../system/User'
-import './ipcSystemHandler'
 
 ipcMain.on(ipc.openExpandWindow, () => {
   WindowHandlerObj.openExpandedWindow()
@@ -36,18 +34,27 @@ ipcMain.handle(ipc.getAllSettings, async () => {
   return await PreferenceManagerObj.getAllSettings()
 })
 
-ipcMain.handle(ipc.getProgramsHTML, (err, name) => {
-  return `<p>Test</p>`
+ipcMain.handle(ipc.getProgramsHTML, async (event, payload = {}) => {
+  let html
+  console.log(payload)
+  if (payload.refreshCache == null || !payload.refreshCache) {
+    html = await StoreManagerObj.getProgramListCache()
+  }
+  if (html == null) {
+    html = await ListUIObj.getList('html')
+    StoreManagerObj.setProgramListCache(html)
+  }
+  return html
 })
 ipcMain.on(ipc.timerRequestTime, () => {
-  WindowHandlerObj.toolsWindow.webContents.send(ipc.timerRemainingTime, OSTimer.getRemainingTime())
+  WindowHandlerObj.toolsWindow.webContents.send(ipc.timerRemainingTime, Timer.getRemainingTime())
 })
 ipcMain.on(ipc.launchProgram, (err, file) => {
-  ProgramHandler.launch(file)
+  ProgramHandlerObj.launch(file)
   WindowHandlerObj.expandedWindow.webContents.send(ipc.closeExpandWindow)
 })
 
-OSTimer.on('osTimer-notify', () => {
-  const notification = OSTimer.getNotification()
+Timer.on('osTimer-notify', () => {
+  const notification = Timer.getNotification()
   WindowHandlerObj.getCurrentWindow().webContents.send(ipc.notificationReceived, notification)
 })

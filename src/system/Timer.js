@@ -3,7 +3,7 @@ import { lockPC, shutdownPC, sleepPC } from './System'
 const EE = require('events')
 
 // OS Action(like sleep, shutdown etc.) Timer
-class OSTimer {
+class Timer {
   constructor() {
     EE.call(this)
     this.remainingTime = 0
@@ -110,5 +110,5 @@ class OSTimer {
   }
 }
 
-OSTimer.prototype.__proto__ = EE.EventEmitter.prototype // bind the event to this class
-export default new OSTimer()
+Timer.prototype.__proto__ = EE.EventEmitter.prototype // bind the event to this class
+export default new Timer()

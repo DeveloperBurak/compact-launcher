@@ -1,10 +1,12 @@
+import { BrowserWindow, screen } from 'electron'
 import path from 'path'
-import url from 'url'
+import { PreferenceManagerObj } from '../background'
 import scenes from '../configs/scenes.json'
-import { getSteamUser } from '../helpers/ipcActions'
-import createWindow from '../helpers/window'
+import { isDev } from '../helpers/env'
+import { getSteamUser } from '../strings/ipc'
+import { isLinux, isWindows } from '../helpers/os'
+import * as setting from '../strings/settings'
 import Steam from './Steam'
-import { BrowserWindow } from 'electron'
 
 export class WindowHandler {
   constructor() {
@@ -15,14 +17,8 @@ export class WindowHandler {
   }
   openCollapsedWindow = () => {
     if (this.collapsedWindow == null) {
-      let collapsedWindow = createWindow('collapsed', scenes.collapsedScreen)
-      collapsedWindow.loadURL(
-        url.format({
-          pathname: path.join(__dirname, 'views/collapsed.html'),
-          protocol: 'file:',
-          slashes: true,
-        }),
-      )
+      let collapsedWindow = this.createWindow('collapsed', scenes.collapsedScreen)
+      collapsedWindow.loadURL(path.join(__dirname, 'views/collapsed.html'))
       collapsedWindow.on('ready-to-show', () => {
         collapsedWindow.show()
         if (this.expandedWindow != null) this.expandedWindow.close()
@@ -37,15 +33,8 @@ export class WindowHandler {
   }
   openExpandedWindow = () => {
     if (this.expandedWindow == null) {
-      let expandedWindow = createWindow('expanded', scenes.expandedScreen)
-      expandedWindow.loadURL(
-        url.format({
-          pathname: path.join(__dirname, 'views/expanded.html'),
-          protocol: 'file:',
-          slashes: true,
-        }),
-      )
-
+      let expandedWindow = this.createWindow('expanded', scenes.expandedScreen)
+      expandedWindow.loadURL(path.join(__dirname, 'views/expanded.html'))
       expandedWindow.on('ready-to-show', () => {
         Steam.getUser()
           .then((user) => {
@@ -56,30 +45,27 @@ export class WindowHandler {
           .catch((message) => {
             console.log(message)
           })
+        this.expandedWindow = expandedWindow
+        // setTimeout(() => {
+          this.expandedWindow.show()
+        // }, 1000)
+
         if (this.collapsedWindow != null) {
           this.collapsedWindow.close()
           this.collapsedWindow = null
         }
-        expandedWindow.show()
       })
       expandedWindow.on('closed', () => {
         this.expandedWindow = null
       })
-      this.expandedWindow = expandedWindow
     } else {
       expandedWindow.show()
     }
   }
   openSettingsWindow = () => {
     if (this.settingsWindow == null) {
-      let settingsWindow = createWindow('subSettings', scenes.settingsScreen)
-      settingsWindow.loadURL(
-        url.format({
-          pathname: path.join(__dirname, 'views/sub/settings.html'),
-          protocol: 'file:',
-          slashes: true,
-        }),
-      )
+      let settingsWindow = this.createWindow('subSettings', scenes.settingsScreen)
+      settingsWindow.loadURL(path.join(__dirname, 'views/sub/settings.html'))
       settingsWindow.setMenu(null)
       settingsWindow
         .on('ready-to-show', () => {
@@ -99,14 +85,8 @@ export class WindowHandler {
   }
   openToolsWindow = () => {
     if (this.toolsWindow === null) {
-      let toolsWindow = createWindow('subTools', scenes.toolsScreen)
-      toolsWindow.loadURL(
-        url.format({
-          pathname: path.join(__dirname, 'views/sub/tools.html'),
-          protocol: 'file:',
-          slashes: true,
-        }),
-      )
+      let toolsWindow = this.createWindow('subTools', scenes.toolsScreen)
+      toolsWindow.loadURL(path.join(__dirname, 'views/sub/tools.html'))
       toolsWindow.setMenu(null)
       toolsWindow
         .on('ready-to-show', () => {
@@ -124,5 +104,50 @@ export class WindowHandler {
   }
   getCurrentWindow = () => {
     return BrowserWindow.getFocusedWindow()
+  }
+  getAllWindows() {
+    // we may use more customized queries later, so dont call the BrowserWindow's object directly if it isn't necessary
+    return BrowserWindow.getAllWindows()
+  }
+
+  createWindow = (name, options) => {
+    let win = null
+    let windowOptions = {
+      frame: options.frame ?? false,
+      transparent: options.transparent ?? false,
+      useContentSize: options.useContentSize ?? false,
+      skipTaskbar: options.skipTaskbar ?? true,
+      resizable: options.resizable ?? false,
+      show: options.show ?? false,
+      center: options.center ?? null,
+      fullscreen: options.fullscreen ?? null,
+      width: options.width ?? screen.getPrimaryDisplay().size.width,
+      height: options.height ?? screen.getPrimaryDisplay().size.height,
+      webPreferences: { contextIsolation: false, enableRemoteModule: true, nodeIntegration: true }, // TODO security hole. change there
+    }
+
+    if (options.type == 'toolbar') {
+      if (isWindows() || isLinux()) {
+        windowOptions.type = options.type
+      }
+    }
+    const alwaysOnTop = PreferenceManagerObj.getSetting(setting.alwaysOnTop)
+    if (alwaysOnTop != null) {
+      windowOptions.alwaysOnTop = alwaysOnTop
+    } else if (options.alwaysOnTop) {
+      windowOptions.alwaysOnTop = options.alwaysOnTop
+    }
+    if (windowOptions.center == null) {
+      windowOptions.x = options.x ?? 0
+      windowOptions.y = options.y ?? 0
+    }
+    win = new BrowserWindow(windowOptions)
+    const additionalTitle = options.title != null ? ' - ' + options.title : ''
+    win.setTitle('Compact Launcher' + additionalTitle)
+    win.setSkipTaskbar(options.skipTaskbar ?? false)
+    if (options.devTools && isDev()) {
+      win.webContents.openDevTools({ mode: 'undocked' })
+    }
+    return win
   }
 }

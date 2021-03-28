@@ -1,119 +1,74 @@
-import FileManager from "./FileManager";
-import { scan } from "../helpers/folder";
-import execute from "../helpers/execute";
-import path from "path";
-const fs = require("fs");
+import { exec } from 'child_process'
+import fs from 'fs'
+import { devLog } from '../helpers/console'
 
 class ProgramHandler {
-  async getList(type = "json") {
-    if (type === "html") {
-      // TODO html converter
-      const list = await this.readProgramsFromShortcutsFolder();
-      
-    } else if (type === "json") {
-      return await this.readProgramsFromShortcutsFolder();
-    }
+  constructor() {
+    this.pidsFromApp = [] // pid that started through this app, currently we use it for setting always on top
+    this.listeningInterval = null
   }
-
-  async readProgramsFromShortcutsFolder() {
-    const items = await scan(FileManager.get("shortcuts"));
-    let list = [];
-    let uncategorized;
-    for (let item of items) {
-      if (item.hasOwnProperty("file")) {
-        if (!(uncategorized instanceof Category)) {
-          uncategorized = new Category("Uncategorized");
+  async launch(file) {
+    let command
+    switch (process.platform) {
+      case 'win32':
+        command = 'start "" "' + file + '"' // "" is required, otherwise command execute as cd
+        break
+      case 'linux':
+        // check the file has execute permission
+        const canAccess = await fs.promises.access(file.replace(/(\s+)/g, '$1'), fs.constants.X_OK)
+        if (!canAccess) {
+          throw new Error('cannot execute')
+        } else {
+          const data = await fs.promises.readFile(file.replace(/(\s+)/g, '$1'))
+          let execString = data.toString()
+          execString = execString.search('/\bExec=(.*)+')
+          command = 'gtk-launch ' + execString // TODO check that
         }
-        uncategorized.add(item);
-      } else if (item.hasOwnProperty("folder")) {
-        list.push(new Category(item.name, item.items));
-      }
+        break
+      default:
+        throw new Error('OS not supported')
     }
-    if (uncategorized != null) list.push(uncategorized);
-    return list;
-  }
-
-  launch(file) {
-    this.prepareCommand(file).then((command) => {
-      if (command != null) {
-        execute(command);
+    if (command != null) {
+      devLog(command)
+      const executed = exec(command, (error) => {
+        if (error != null) {
+          devLog(error)
+          return
+        }
+      })
+      if (executed.pid !== 0) {
+        this.pidsFromApp.push(executed.pid)
       }
-    });
-  }
-
-  prepareCommand(file) {
-    return new Promise((resolve, reject) => {
-      let command = null;
-      switch (process.platform) {
-        case "win32":
-          command = 'start "" "' + file + '"'; // "" is required, otherwise command execute as cd
-          resolve(command);
-          break;
-        // TODO
-        case "linux":
-          // check the file has execute permission
-          fs.access(file.replace(/(\s+)/g, "$1"), fs.constants.X_OK, (err) => {
-            if (err) {
-              reject("cannot execute");
-            } else {
-              command = "gtk-launch " + file.replace(/(\s+)/g, "$1");
-              fs.readFile(file.replace(/(\s+)/g, "$1"), function (err, data) {
-                if (err) return console.error(err);
-                const regex = "/\bExec=(.*)+";
-                let execString = data.toString();
-                execString = execString.search(regex);
-              });
-            }
-          });
-          break;
-        // TODO
-        case "darwin":
-          break;
-      }
-      if (command !== null) {
-        resolve(command);
-      } else {
-        reject("OS not supported");
-      }
-    });
-  }
-}
-
-class Category {
-  constructor(name, items) {
-    this.name = name;
-    this.items = [];
-    if (items != null) {
-      for (let item of items) {
-        this.add(item);
-      }
+      if (this.listeningInterval == null) this.startToListenExecutedProcesses()
     }
   }
-  add(item) {
-    if (item instanceof Program) {
-      this.items.push(item);
-    } else {
-      if (item.hasOwnProperty("file") && item.file === true) {
-        this.items.push(new Program(item));
-      } else if (item.hasOwnProperty("folder") && item.folder === true) {
-        this.items.push(new Category(item.name, item.items));
+
+  startToListenExecutedProcesses() {
+    this.listeningInterval = setInterval(async () => {
+      for (let pid of this.pidsFromApp) {
+        console.log(this.pidIsRunning(pid))
+        if (this.pidIsRunning(pid)) {
+          return
+        }
       }
+      this.stopListenExecutedProcesses()
+    }, this.pidsFromApp.length * 50) // let the 50ms for every proccess, this prevents the getting over cpu usage while number of executed commands increaces
+  }
+
+  stopListenExecutedProcesses() {
+    devLog('closing interval')
+    // if the method is not returned, this mean all proccesses closed
+    if (this.listeningInterval != null) clearInterval(this.listeningInterval)
+  }
+
+  pidIsRunning = (pid) => {
+    try {
+      process.kill(pid, 0)
+      return true
+    } catch (e) {
+      return false
     }
   }
 }
 
-class Program {
-  constructor(item) {
-    if (item !== null && item.hasOwnProperty("file") && item.file === true) {
-      this.name = item["name"];
-      this.ext = item["ext"];
-      this.image = path.join(FileManager.get("images"), item["name"] + ".jpg");
-      this.exePath = item["fullpath"];
-    } else {
-      console.log("incompatible");
-      throw new Error(file);
-    }
-  }
-}
-
-export default new ProgramHandler();
+export default ProgramHandler

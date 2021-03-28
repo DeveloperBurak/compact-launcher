@@ -1,12 +1,7 @@
-import {app, BrowserWindow, Menu, Tray} from "electron";
+import { app, Menu, Tray } from "electron";
 import path from "path";
-import {trayMenuTemplate} from "../menu/tray_menu_template";
-import {programName} from "../configs/global_variables";
-import ForegroundProgramTracker from "./ForegroundProgramTracker";
-import * as setting from "../helpers/settingKeys";
-import FileManager from "./FileManager";
-import {fileExists} from "../helpers/file";
-import execute from "../helpers/execute";
+import { APP_NAME } from "../configs/app.json";
+import { trayMenuTemplate } from "../menu/tray_menu_template";
 
 const fs = require("fs");
 const AutoLaunch = require("auto-launch");
@@ -18,7 +13,7 @@ export const setTray = () => {
   );
 
   const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
-  tray.setToolTip(programName);
+  tray.setToolTip(APP_NAME);
   tray.setContextMenu(contextMenu);
   return tray;
 };
@@ -39,29 +34,17 @@ export const setAutoLaunch = (enabled = true) => { // auto launch the program on
   });
 };
 
-export const startProgramTracking = () => {
-  ForegroundProgramTracker.start((isForbidden) => {
-    BrowserWindow.getAllWindows().filter((window) => {
-      window.setAlwaysOnTop(!isForbidden);
-    });
-  });
-};
-
-export const stopProgramTracking = () => {
-  ForegroundProgramTracker.stop();
-};
-
 export const shutdownPC = () => {
   switch (process.platform) {
     case 'win32':
-      execute("shutdown -s -f");
+      exec("shutdown -s -f");
       break;
     case 'darwin':
       // TODO
       console.log("macos close")
       break;
     case 'linux':
-      execute("shutdown", (message) => {
+      exec("shutdown", (message) => {
         console.log(message)
       });
       break;
@@ -73,14 +56,14 @@ export const shutdownPC = () => {
 export const cancelShutDown = () => {
   switch (process.platform) {
     case 'win32':
-      execute("shutdown -a");
+      exec("shutdown -a");
       break;
     case 'darwin':
       // TODO
       console.log("macos close")
       break;
     case 'linux':
-      execute("shutdown -c");
+      exec("shutdown -c");
       break;
     default:
       throw new Error("Invalid OS");
@@ -90,14 +73,14 @@ export const cancelShutDown = () => {
 export const sleepPC = () => {
   switch (process.platform) {
     case 'win32':
-      execute("rundll32.exe powrprof.dll,SetSuspendState 0,1,0") // TODO add a caution about your pc may go to hibernate mode
+      exec("rundll32.exe powrprof.dll,SetSuspendState 0,1,0") // TODO add a caution about your pc may go to hibernate mode
       break;
     case 'darwin':
       // TODO
       console.log("macos sleep")
       break;
     case 'linux':
-      execute("systemctl suspend");
+      exec("systemctl suspend");
       break;
     default:
       throw new Error("Invalid OS");
@@ -107,14 +90,14 @@ export const sleepPC = () => {
 export const lockPC = () => {
   switch (process.platform) {
     case 'win32':
-      execute("rundll32.exe user32.dll,LockWorkStation")
+      exec("rundll32.exe user32.dll,LockWorkStation")
       break;
     case 'darwin':
       // TODO
       console.log("macos lock")
       break;
     case 'linux':
-      execute("gnome-screensaver-command --lock");
+      exec("gnome-screensaver-command --lock");
       break;
     default:
       throw new Error("Invalid OS");

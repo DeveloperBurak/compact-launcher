@@ -1,34 +1,23 @@
-import * as ipc from '../helpers/ipcActions'
-import { app, ipcMain } from 'electron'
-import Program from '../system/Program'
-import OSTimer from '../system/OSTimer'
-import Steam from '../system/Steam'
-import { cacheProgramHTML } from '../configs/global_variables'
-import { removeFile } from '../helpers/file'
-import { startProgramTracking, stopProgramTracking, setSetting, setAutoLaunch } from '../system/System'
-import * as setting from '../helpers/settingKeys'
-import FileManager from '../system/FileManager'
+import { ipcMain } from 'electron'
+import { ForegroundProgramTrackerObj, PreferenceManagerObj, StoreManagerObj } from '../background'
+import { cacheProgramHTML } from '../strings/store'
 import { devLog } from '../helpers/console'
-import StoreManager from '../system/StoreManager'
-import { PreferenceManagerObj } from '../background'
-
-ipcMain.on(ipc.cacheScannedPrograms, (err, cache) => {
-  StoreManager.set('app.version', Number.parseFloat(app.getVersion()))
-  StoreManager.setProgramListCache(cache.html)
-})
+import { removeFile } from '../helpers/file'
+import * as ipc from '../strings/ipc'
+import FileManager from '../system/FileManager'
+import Program from '../system/Program'
+import Steam from '../system/Steam'
+import { setAutoLaunch } from '../system/System'
+import Timer from '../system/Timer'
 
 ipcMain.on(ipc.systemLog, (err, value) => {
   devLog(value)
 })
 
-ipcMain.on(ipc.removeProgramCache, () => {
-  StoreManager.deleteProgramListCache()
-})
-
 ipcMain.on(ipc.removeProgram, (err, path) => {
   removeFile(path).then((deleted) => {
     if (deleted) {
-      StoreManager.delete(cacheProgramHTML)
+      StoreManagerObj.delete(cacheProgramHTML)
     }
   })
 })
@@ -36,7 +25,7 @@ ipcMain.on(ipc.removeProgram, (err, path) => {
 ipcMain.on(ipc.removeImageFromProgram, (err, imagePath) => {
   removeFile(imagePath).then((deleted) => {
     if (deleted) {
-      StoreManager.delete(cacheProgramHTML)
+      StoreManagerObj.delete(cacheProgramHTML)
     }
   })
 })
@@ -54,16 +43,16 @@ ipcMain.on(ipc.disableShutdown, () => {
 })
 
 ipcMain.on(ipc.timerStarted, (err, data) => {
-  OSTimer.startTimer(data.time, data.action)
+  Timer.startTimer(data.time, data.action)
 })
 
 ipcMain.on(ipc.timerSetTime, (err, data) => {
-  OSTimer.clearTime()
-  OSTimer.startTimer(data.timeLeft, data.action)
+  Timer.clearTime()
+  Timer.startTimer(data.timeLeft, data.action)
 })
 
 ipcMain.on(ipc.timerStopped, () => {
-  OSTimer.clearTime()
+  Timer.clearTime()
 })
 
 ipcMain.on(ipc.setAutoLaunch, (err, enabled) => {
@@ -76,9 +65,9 @@ ipcMain.on(ipc.setSetting, (err, payload) => {
 
 ipcMain.on(ipc.setAlwaysOnTop, (err, enabled) => {
   if (enabled) {
-    startProgramTracking()
+    ForegroundProgramTrackerObj.start()
   } else {
-    stopProgramTracking()
+    ForegroundProgramTrackerObj.stop()
   }
 })
 

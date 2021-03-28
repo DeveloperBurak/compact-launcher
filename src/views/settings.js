@@ -1,10 +1,10 @@
-import './app'
+import { ipcRenderer } from 'electron'
+import $ from 'jquery'
+import { isDev } from '../helpers/env'
+import * as ipc from '../strings/ipc'
 import '../stylesheets/main.css'
 import '../stylesheets/sub-windows.css'
-import { ipcRenderer } from 'electron'
-import env from 'env'
-import $ from 'jquery'
-import * as ipc from '../helpers/ipcActions'
+import './app'
 
 const tab = require('bootstrap').Tab
 
@@ -26,7 +26,7 @@ $(() => {
     const button = $(e.currentTarget)
     $(button).tab('show')
   })
-  if (env.name !== 'development') {
+  if (isDev()) {
     $('.development').hide()
   }
   $('.input-setting').on('change', function (e) {
@@ -35,10 +35,10 @@ $(() => {
       value: $(this).prop('checked'),
     })
   })
-  $('#autoLaunch').change(function () {
+  $('#autoLaunch').on('change', function () {
     ipcRenderer.send(ipc.setAutoLaunch, $(this).prop('checked'))
   })
-  $('#alwaysOnTop').change(function () {
+  $('#alwaysOnTop').on('change', function () {
     ipcRenderer.send(ipc.setAlwaysOnTop, $(this).prop('checked'))
   })
 })

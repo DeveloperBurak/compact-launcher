@@ -1,13 +1,12 @@
 import { ipcRenderer } from 'electron'
-import { getSetting, moveFile, openExpandWindow } from '../helpers/ipcActions'
-import { expandOnHover } from '../helpers/settingKeys'
+import { getSetting, moveFile, openExpandWindow } from '../strings/ipc'
+import { expandOnHover } from '../strings/settings'
 import '../stylesheets/collapsed.css'
 import '../stylesheets/main.css'
 
 const expandButton = document.getElementById('expandButton')
 
 ipcRenderer.invoke(getSetting, expandOnHover).then((expandOnHover) => {
-  console.log(expandOnHover);
   if (expandOnHover === true) {
     let openingTimeout = null
     expandButton.addEventListener('mouseleave', () => {
@@ -31,14 +30,14 @@ function expand() {
   ipcRenderer.send(openExpandWindow)
 }
 
-expandButton.addEventListener('drop', function (e) {
-  e.preventDefault()
-  e.stopPropagation()
+expandButton.addEventListener('drop', function (e) { // file drop handler
+  e.preventDefault() // 
+  e.stopPropagation() // 
   let files = []
-  for (let f of e.dataTransfer.files) {
+  for (let f of e.dataTransfer.files) { // get the 
     files.push(f.path)
   }
-  ipcRenderer.send(moveFile, files)
+  ipcRenderer.send(moveFile, files) // send the absolute paths of files to node server for moving
   return false
 })
 expandButton.addEventListener('dragover', function (e) {

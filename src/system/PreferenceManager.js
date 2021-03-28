@@ -5,7 +5,7 @@ import { fileExists } from '../helpers/file'
 
 export class PreferenceManager {
   constructor() {
-    this.preferencePath = path.join(FileManager.get('userdata'), 'preferences.json')
+    this.preferencePath = path.join(FileManager.getPathOf('userdata'), 'preferences.json')
     fileExists(this.preferencePath).then((exists) => {
       if (!exists) {
         fs.writeFileSync(this.preferencePath, JSON.stringify({}))

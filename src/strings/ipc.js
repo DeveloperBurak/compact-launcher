@@ -1,8 +1,6 @@
 export const getPrograms = 'programs:get'
 export const getProgramsHTML = 'programs:get:html'
 export const itemsReady = 'items:ready'
-export const cacheScannedPrograms = 'cache:programs'
-export const removeProgramCache = 'cache:programs:remove'
 export const renderItem = 'items:render'
 
 export const getSteamUser = 'steam:user:get'

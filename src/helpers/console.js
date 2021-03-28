@@ -1,5 +1,13 @@
-import env from "env";
+import { isDev } from './env'
 
 export function devLog(...log) {
-  if(env.name === "development") console.log(log);
-};
+  if (isDev()) {
+    if (log.length === 1) {
+      console.log(log[0])
+    } else {
+      for (let i in log) {
+        console.log(log[i])
+      }
+    }
+  }
+}

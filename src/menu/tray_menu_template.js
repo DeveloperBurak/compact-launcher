@@ -1,6 +1,5 @@
 import { app } from 'electron'
-import ForegroundProgramTracker from '../system/ForegroundProgramTracker'
-import { WindowHandlerObj } from '../background'
+import { ForegroundProgramTrackerObj, WindowHandlerObj } from '../background'
 export const trayMenuTemplate = [
   {
     label: 'Foreground Program',
@@ -8,13 +7,13 @@ export const trayMenuTemplate = [
       {
         label: 'Add to Blacklist',
         click: () => {
-          ForegroundProgramTracker.addProgram()
+          ForegroundProgramTrackerObj.addToBlacklist()
         },
       },
       {
         label: 'Remove From Blacklist',
         click: () => {
-          ForegroundProgramTracker.removeProgram()
+          ForegroundProgramTrackerObj.removeFromBlacklist()
         },
       },
     ],

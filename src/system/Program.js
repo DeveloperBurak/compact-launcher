@@ -7,7 +7,7 @@ const path = require('path');
 class Program {
 
   addNewImage(source, name) {
-    const image = path.join(FileManager.get('images'), name + '.jpg');
+    const image = path.join(FileManager.getPathOf('images'), name + '.jpg');
     fileExists(image).then(async exists => {
       if (exists) {
         await removeFile(image);

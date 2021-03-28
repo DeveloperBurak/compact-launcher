@@ -1,81 +1,76 @@
-import {fileExists} from "../helpers/file";
-import FileManager from "./FileManager";
-
-const fs = require('fs');
-const path = require('path');
-const activeWin = require('active-win');
-
+import activeWin from 'active-win'
+import fs from 'fs'
+import path from 'path'
+import { WindowHandlerObj } from '../background'
+import { fileExists } from '../helpers/file'
+import FileManager from './FileManager'
 class ForegroundProgramTracker {
-
   constructor() {
-    this.forbiddenApps = [];
-    this.activeProgram = null;
-    this.forbiddenProgramsFile = path.join(FileManager.get('userdata'), 'forbidden-programs.json');
-    this.tracking = null;
-    fileExists(this.forbiddenProgramsFile).then(result => {
-      if (!result) {
-        this.forbiddenApps = ["chrome.exe", "steam.exe"];
-        fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.forbiddenApps));
+    this.blackList = [] // if the foreground program is in this list, change
+    this.activeProgram = null
+    this.forbiddenProgramsFile = path.join(FileManager.getPathOf('userdata'), 'forbidden-programs.json')
+    this.trackingInterval = null
+    fileExists(this.forbiddenProgramsFile).then((exists) => {
+      if (!exists) {
+        fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.blackList))
       } else {
         fs.readFile(this.forbiddenProgramsFile, (err, data) => {
-          this.forbiddenApps = JSON.parse(data.toString('utf8'));
-        });
+          this.blackList = JSON.parse(data.toString('utf8'))
+        })
       }
-    });
+    })
   }
 
-  start(callback, interval = 1000) {
-    this.tracking = setInterval(() => {
-      activeWin().then(response => {
-        if (response != null) {
-          if (this.forbiddenApps.indexOf(response.owner.name) >= 0) {
-            callback(true);
-          } else {
-            callback(false);
-          }
-          if ((response.owner.name !== "Compact Launcher.exe" && response.owner.name !== 'electron.exe' && response.owner.name !== 'Compact Launcher') && this.activeProgram !== response.owner.name) {
-            this.activeProgram = response.owner.name;
-            console.log("Foreground Program: "  + this.activeProgram)
-          }
-        }
-
-      })
-    }, interval);
+  start(interval = 1000) {
+    this.trackingInterval = setInterval(async () => {
+      this.watching()
+    }, interval)
   }
 
   stop() {
-    if (this.tracking != null) clearInterval(this.tracking);
+    // stop timer
+    if (this.trackingInterval != null) clearInterval(this.trackingInterval)
   }
 
-  addProgram() {
-    fs.readFile(this.forbiddenProgramsFile, (err, data) => {
-      this.forbiddenApps = JSON.parse(data.toString('utf8'));
-      if (this.forbiddenApps.indexOf(this.activeProgram) === -1) {
-        this.forbiddenApps.push(this.activeProgram);
-        fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.forbiddenApps));
-      }
-    });
+  addToBlacklist() {
+    if (this.blackList.indexOf(this.activeProgram) === -1) {
+      this.blackList.push(this.activeProgram)
+      fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.blackList))
+    }
   }
 
-  removeProgram() {
-    fs.readFile(this.forbiddenProgramsFile, (err, data) => {
-      this.forbiddenApps = JSON.parse(data.toString('utf8'));
-      if (this.forbiddenApps.indexOf(this.activeProgram) !== -1) {
-        this.forbiddenApps.splice(this.forbiddenApps.indexOf(this.activeProgram), 1);
-        fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.forbiddenApps));
-      }
-    });
+  removeFromBlacklist() {
+    if (this.blackList.indexOf(this.activeProgram) !== -1) {
+      this.blackList.splice(this.blackList.indexOf(this.activeProgram), 1)
+      fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.blackList))
+    }
+  }
+  async watching() {
+    const foregroundProgram = await activeWin()
+    if (
+      foregroundProgram != null &&
+      foregroundProgram.owner.name !== 'Compact Launcher.exe' &&
+      foregroundProgram.owner.name !== 'electron.exe' &&
+      foregroundProgram.owner.name !== 'Compact Launcher' &&
+      this.activeProgram !== foregroundProgram.owner.name
+    ) {
+      this.activeProgram = foregroundProgram.owner.name
+      this.setAlwaysOnTop()
+    }
   }
 
-  listForbiddenProgramsFromFile() {
-    return new Promise((resolve, reject) => {
-      fs.readFile(this.forbiddenProgramsFile, (err, data) => {
-        resolve(JSON.parse(data.toString('utf8')));
-      });
-    });
+  /**
+   * @param force - force the behaviour for always on top property
+   */
+  setAlwaysOnTop(force) {
+    WindowHandlerObj.getAllWindows().forEach((window) => {
+      window.setAlwaysOnTop(force ?? this.blackList.indexOf(this.activeProgram) == -1, 'screen-saver') // apply this rule for all windows.
+    })
+  }
 
+  addToBlacklist(app) {
+    this.blackList.push(app)
   }
 }
 
-
-export default new ForegroundProgramTracker();
+export default ForegroundProgramTracker
