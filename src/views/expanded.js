@@ -1,13 +1,11 @@
-import { alertify } from 'alertifyjs'
+import alertify from 'alertifyjs'
 import { ipcRenderer, remote } from 'electron'
 import $ from 'jquery'
 import { APP_NAME } from '../configs/app.json'
 import { isDev } from '../helpers/env'
 import * as ipc from '../strings/ipc'
-import '../stylesheets/expanded.css'
-import '../stylesheets/main.css'
-import './app'
 const window = remote.getCurrentWindow()
+import './app'
 
 // vscode cant detect we use it, so use require. if we dont, vscode delete these imports when optimizing import
 const contextMenu = require('jquery-contextmenu')
@@ -217,7 +215,6 @@ $(() => {
     },
   })
 })
-
 
 function renderList(payload = {}) {
   programContainer.html('')

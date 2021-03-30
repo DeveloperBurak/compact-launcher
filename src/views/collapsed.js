@@ -1,8 +1,7 @@
 import { ipcRenderer } from 'electron'
 import { getSetting, moveFile, openExpandWindow } from '../strings/ipc'
 import { expandOnHover } from '../strings/settings'
-import '../stylesheets/collapsed.css'
-import '../stylesheets/main.css'
+import './app'
 
 const expandButton = document.getElementById('expandButton')
 

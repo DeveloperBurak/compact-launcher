@@ -91,6 +91,8 @@ export class WindowHandler {
       toolsWindow
         .on('ready-to-show', () => {
           this.toolsWindow = toolsWindow
+      this.toolsWindow
+        .on('ready-to-show', () => {
           if (this.expandedWindow != null) {
             this.expandedWindow.close()
             this.expandedWindow = null

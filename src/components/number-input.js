@@ -1,5 +1,4 @@
 import $ from "jquery";
-import "../stylesheets/components/input-number.css";
 
 (function () {
 

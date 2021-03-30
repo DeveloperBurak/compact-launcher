@@ -1,6 +1,3 @@
-@import '~alertifyjs/build/css/alertify.min.css';
-@import '~alertifyjs/build/css/themes/bootstrap.min.css';
-
 ul {
   padding: 0;
   list-style: none;
@@ -24,6 +21,10 @@ ul {
   margin: auto;
   top: 0;
   left: 0;
+}
+
+.dropdown-list {
+  margin: 10px;
 }
 
 .dropdown-list > li {
@@ -85,19 +86,15 @@ button:focus {
   font-size: 11px;
   padding: 1px 3px;
   display: none;
-  background-color: darkcyan;
-  opacity: 0.3;
+  opacity: 0.6;
   border: none;
   outline: none;
-  color: white;
   z-index: 2;
-  top: 0;
+  top: -5px;
 }
 
 .delete-program:hover {
-  background-color: red;
   opacity: 1;
-  color: white;
 }
 
 #program-preview-container {

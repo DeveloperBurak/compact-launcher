@@ -3,8 +3,6 @@ import $ from 'jquery'
 import '../components/number-input.js'
 import { isDev } from '../helpers/env'
 import * as ipc from '../strings/ipc'
-import '../stylesheets/main.css'
-import '../stylesheets/sub-windows.css'
 import './app'
 
 const tab = require('bootstrap').Tab

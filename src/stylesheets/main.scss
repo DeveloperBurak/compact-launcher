@@ -1,4 +1,12 @@
-@import "~bootstrap/dist/css/bootstrap.min.css";
+@import '~bootstrap/dist/css/bootstrap.min';
+@import '~alertifyjs/build/css/alertify.min';
+@import '~alertifyjs/build/css/themes/bootstrap.min';
+
+@import './components/input-number';
+
+@import './collapsed';
+@import './expanded';
+@import './sub-windows';
 
 html,
 body {
@@ -74,8 +82,7 @@ a {
   animation: appearing 0.5s linear 1;
 }
 
-@-webkit-keyframes appearing /* Safari and Chrome */
-{
+@keyframes appearing {
   from {
     opacity: 0.6;
   }

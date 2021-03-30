@@ -2,10 +2,7 @@ import { ipcRenderer } from 'electron'
 import $ from 'jquery'
 import { isDev } from '../helpers/env'
 import * as ipc from '../strings/ipc'
-import '../stylesheets/main.css'
-import '../stylesheets/sub-windows.css'
 import './app'
-
 const tab = require('bootstrap').Tab
 
 ipcRenderer.invoke(ipc.getAllSettings).then((settings) => {
