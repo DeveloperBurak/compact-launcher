@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { app, Menu, Tray } from "electron";
 import path from "path";
 import { APP_NAME } from "../configs/app.json";

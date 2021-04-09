@@ -1,5 +1,6 @@
 const fs = require('fs')
 import { parse } from '@node-steam/vdf'
+import { isWindows } from './os'
 
 export const readVdf = (file) => {
   return new Promise((resolve, reject) => {
