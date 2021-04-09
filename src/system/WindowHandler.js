@@ -1,11 +1,12 @@
 import { BrowserWindow, screen } from 'electron'
 import path from 'path'
-import { PreferenceManagerObj } from '../background'
+import { PreferenceManagerObj, StoreManagerObj } from '../background'
 import scenes from '../configs/scenes.json'
 import { isDev } from '../helpers/env'
-import { getSteamUser } from '../strings/ipc'
 import { isLinux, isWindows } from '../helpers/os'
+import { getSteamUser, themeInfo } from '../strings/ipc'
 import * as setting from '../strings/settings'
+import { primaryThemeColor, secondaryThemeColor, textColor } from '../strings/store'
 import Steam from './Steam'
 
 export class WindowHandler {
@@ -21,6 +22,7 @@ export class WindowHandler {
       collapsedWindow.loadURL(path.join(__dirname, 'views/collapsed.html'))
       collapsedWindow.on('ready-to-show', () => {
         collapsedWindow.show()
+        this.sendThemeInfo(collapsedWindow)
         if (this.expandedWindow != null) this.expandedWindow.close()
         this.collapsedWindow = collapsedWindow
       })
@@ -46,10 +48,8 @@ export class WindowHandler {
             console.log(message)
           })
         this.expandedWindow = expandedWindow
-        // setTimeout(() => {
-          this.expandedWindow.show()
-        // }, 1000)
-
+        this.expandedWindow.show()
+        this.sendThemeInfo(expandedWindow)
         if (this.collapsedWindow != null) {
           this.collapsedWindow.close()
           this.collapsedWindow = null
@@ -75,6 +75,7 @@ export class WindowHandler {
             this.expandedWindow = null
           }
           settingsWindow.show()
+          this.sendThemeInfo(settingsWindow)
         })
         .on('closed', () => {
           this.settingsWindow = null
@@ -88,22 +89,33 @@ export class WindowHandler {
       let toolsWindow = this.createWindow('subTools', scenes.toolsScreen)
       toolsWindow.loadURL(path.join(__dirname, 'views/sub/tools.html'))
       toolsWindow.setMenu(null)
-      toolsWindow
-        .on('ready-to-show', () => {
-          this.toolsWindow = toolsWindow
+      this.toolsWindow = toolsWindow
       this.toolsWindow
         .on('ready-to-show', () => {
           if (this.expandedWindow != null) {
             this.expandedWindow.close()
             this.expandedWindow = null
           }
-          toolsWindow.show()
+          this.toolsWindow.show()
+          this.sendThemeInfo(this.toolsWindow)
         })
         .on('closed', () => {
           this.toolsWindow = null
         })
     }
   }
+
+  /**
+   * @param {BrowserWindow} win
+   */
+  sendThemeInfo = (win) => {
+    win.webContents.send(themeInfo, {
+      primary: StoreManagerObj.get(primaryThemeColor),
+      secondary: StoreManagerObj.get(secondaryThemeColor),
+      text: StoreManagerObj.get(textColor),
+    })
+  }
+
   getCurrentWindow = () => {
     return BrowserWindow.getFocusedWindow()
   }
@@ -133,7 +145,7 @@ export class WindowHandler {
         windowOptions.type = options.type
       }
     }
-    const alwaysOnTop = PreferenceManagerObj.getSetting(setting.alwaysOnTop)
+    const alwaysOnTop = PreferenceManagerObj.get(setting.alwaysOnTop)
     if (alwaysOnTop != null) {
       windowOptions.alwaysOnTop = alwaysOnTop
     } else if (options.alwaysOnTop) {

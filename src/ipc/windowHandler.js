@@ -27,11 +27,11 @@ ipcMain.on(ipc.isSteamExists, () => {
 })
 
 ipcMain.handle(ipc.getSetting, (err, name) => {
-  return PreferenceManagerObj.getSetting(name)
+  return PreferenceManagerObj.get(name)
 })
 
 ipcMain.handle(ipc.getAllSettings, async () => {
-  return await PreferenceManagerObj.getAllSettings()
+  return await PreferenceManagerObj.getAll()
 })
 
 ipcMain.handle(ipc.getProgramsHTML, async (event, payload = {}) => {

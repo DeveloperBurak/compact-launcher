@@ -3,7 +3,8 @@ import fs from 'fs'
 import path from 'path'
 import { StoreManagerObj } from '../background'
 import file from '../configs/file'
-import { devLog } from '../helpers/console'
+import { devLog, errorLog } from '../helpers/console'
+import { isValidImageExt, isValidShortcutExt } from '../helpers/file'
 import { mkdirIfNotExists } from '../helpers/folder'
 class FileManager {
   constructor() {
@@ -19,7 +20,7 @@ class FileManager {
     for (let folder of folders) {
       mkdirIfNotExists(folder).then((result) => {
         if (!result) {
-          console.log(folder)
+          devLog(folder)
         }
       })
     }
@@ -29,15 +30,29 @@ class FileManager {
     return this.folder[key]
   }
 
-  moveToShortcutsFolder = (filePath) => {
+  moveToOurDocument = (filePath) => {
     const fileName = path.basename(filePath)
-    fs.rename(filePath, path.join(this.folder.shortcuts, fileName), (err) => {
-      if (err) {
-        devLog(err)
-      } else {
-        StoreManagerObj.deleteProgramListCache()
-      }
-    })
+    const ext = path.parse(filePath).ext // .html
+    if (isValidImageExt(ext)) {
+      fs.rename(filePath, path.join(this.folder.images, fileName), (err) => {
+        if (err) {
+          errorLog(err)
+        } else {
+          StoreManagerObj.deleteProgramListCache()
+        }
+      })
+    } else if (isValidShortcutExt(ext)) {
+      fs.rename(filePath, path.join(this.folder.shortcuts, fileName), (err) => {
+        if (err) {
+          errorLog(err)
+        } else {
+          StoreManagerObj.deleteProgramListCache()
+        }
+      })
+    } else {
+      // dont move the file if the file is not shortcut nor image
+      errorLog('invalid extension')
+    }
   }
 }
 

@@ -39,4 +39,6 @@ export const timerStopped = 'tools:timer:stopped'
 export const timerRequestTime = 'tools:timer:request:time' // send a request from client
 export const timerRemainingTime = 'tools:timer:time'
 
+export const themeInfo = 'theme:info'
+
 export const moveFile = 'file:move'

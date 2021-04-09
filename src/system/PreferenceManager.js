@@ -12,18 +12,18 @@ export class PreferenceManager {
       }
     })
   }
-  getSetting = async (name) => {
+  get = async (name) => {
     const file = await fs.promises.readFile(this.preferencePath)
     const preferences = await JSON.parse(file.toString('utf8'))
     return typeof preferences[name] === 'undefined' ? null : preferences[name]
   }
-  setSetting = async (name, value) => {
+  set = async (name, value) => {
     const file = await fs.promises.readFile(this.preferencePath)
     let preferences = await JSON.parse(file.toString('utf8'))
     preferences[name] = value
     fs.writeFileSync(this.preferencePath, JSON.stringify(preferences))
   }
-  getAllSettings = async () => {
+  getAll = async () => {
     const file = await fs.promises.readFile(this.preferencePath)
     return await JSON.parse(file.toString('utf8'))
   }

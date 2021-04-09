@@ -43,7 +43,7 @@ class ListUI {
     let html = ''
     if (category != null) {
       html += `<li key="${category.name}" style="padding-left: ${20 * level}px">
-      <button class="btn list dropdown-button">${category.name}</button>
+      <button class="btn list dropdown-button secondary-bg">${category.name}</button>
       <ul class="dropdown-list${inner === true ? ' inner' : ''}" style="padding-left:"${15 * level}px">
         ${
           category.items !== null &&
@@ -64,9 +64,9 @@ class ListUI {
   renderButton = (program) => {
     return `<li class="program-cover">
           <button class="btn program col-sm-11" programName="${program.name}" image="${program.image}" execute="${program.exePath}">
-            <p class="float-left">${program.name}</p>
+            <p class="float-left theme-text">${program.name}</p>
           </button>
-          <button class="btn delete-program col-sm-1 float-right" del="${program.exePath}">X</button>
+          <button class="btn delete-program col-sm-1 float-right primary-bg theme-text" del="${program.exePath}">X</button>
         </li>`
   }
 }

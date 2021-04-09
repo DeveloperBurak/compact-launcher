@@ -29,7 +29,6 @@ if (isLinux() || isWindows()) {
 }
 
 export let tray // system tray
-
 app.on('ready', () => {
   WindowHandlerObj.openCollapsedWindow()
   FileManager.createRequiredFolders()
@@ -42,9 +41,9 @@ app.on('ready', () => {
   if (StoreManagerObj.get(appVersion) == null) {
     StoreManagerObj.set(appVersion, version)
   }
-  const alwaysOnTop = PreferenceManagerObj.getSetting(setting.alwaysOnTop)
+  const alwaysOnTop = PreferenceManagerObj.get(setting.alwaysOnTop)
   if (alwaysOnTop == null) {
-    PreferenceManagerObj.setSetting(setting.alwaysOnTop, true) // default value is true
+    PreferenceManagerObj.set(setting.alwaysOnTop, true) // default value is true
   }
   if (alwaysOnTop == null || alwaysOnTop) {
     ForegroundProgramTrackerObj.start() // if always on top is true or null, start the

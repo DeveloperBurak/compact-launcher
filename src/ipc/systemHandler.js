@@ -60,7 +60,7 @@ ipcMain.on(ipc.setAutoLaunch, (err, enabled) => {
 })
 
 ipcMain.on(ipc.setSetting, (err, payload) => {
-  PreferenceManagerObj.setSetting(payload.key, payload.value)
+  PreferenceManagerObj.set(payload.key, payload.value)
 })
 
 ipcMain.on(ipc.setAlwaysOnTop, (err, enabled) => {
@@ -73,7 +73,7 @@ ipcMain.on(ipc.setAlwaysOnTop, (err, enabled) => {
 
 ipcMain.on(ipc.moveFile, (err, files) => {
   for (let file of files) {
-    FileManager.moveToShortcutsFolder(file)
+    FileManager.moveToOurDocument(file)
   }
 })
 

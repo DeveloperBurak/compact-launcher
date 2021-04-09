@@ -1,3 +1,10 @@
 {
-  "APP_NAME": "Compact Launcher"
+  "APP_NAME": "Compact Launcher",
+  "UI": {
+    "THEME": {
+      "PRIMARY": "#008b8b",
+      "SECONDARY": "#525252",
+      "TEXT": "#ffffff"
+    }
+  }
 }
