@@ -104,14 +104,19 @@ $(() => {
     const button = $(e.currentTarget)
     const dropdownLists = button.siblings('.dropdown-list')
     if (dropdownLists.is(':hidden')) {
-      if (!dropdownLists.hasClass('inner')) {
-        button.closest('#program-container').children('li').children('.dropdown-list').slideUp(500).removeClass('active')
-      }
-      button.parent().siblings('li').children('button').removeClass('active')
+      // open the list
+
+      // TODO bind this to user preference
+      const otherBrothers = button.closest('ul').children(`li[key!="${button.siblings('li').attr('key')}"]`)
+      otherBrothers.children('.btn.list.dropdown-button').removeClass('active')
+      otherBrothers.children('.dropdown-list').slideUp(500)
+      otherBrothers.children('.dropdown-list').removeClass('active')
+
       button.addClass('active')
       dropdownLists.slideDown(500)
       dropdownLists.addClass('active')
     } else {
+      // close the list
       dropdownLists.slideUp(500)
       dropdownLists.removeClass('active')
       button.removeClass('active')

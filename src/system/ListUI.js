@@ -44,19 +44,17 @@ class ListUI {
     if (category != null) {
       html += `<li key="${category.name}" style="padding-left: ${20 * level}px">
       <button class="btn list dropdown-button secondary-bg">${category.name}</button>
-      <ul class="dropdown-list${inner === true ? ' inner' : ''}" style="padding-left:"${15 * level}px">
-        ${
-          category.items !== null &&
-          category.items.map((item) => {
-            if (item instanceof Category) {
-              return this.generateList(item, true, level + 1)
-            } else if (item instanceof Program) {
-              return this.renderButton(item)
-            }
-          })
-        }
-      </ul>
-    </li>`
+      <ul class="dropdown-list${inner === true ? ' inner' : ''}" style="padding-left:"${15 * level}px">`
+      if (category.items !== null) {
+        category.items.map((item) => {
+          if (item instanceof Category) {
+            html += this.generateList(item, true, level + 1)
+          } else if (item instanceof Program) {
+            html += this.renderButton(item)
+          }
+        })
+      }
+      html += `</ul></li>`
     }
     return html
   }
@@ -88,7 +86,7 @@ class Category {
       if (item.hasOwnProperty('file') && item.file === true) {
         this.items.push(new Program(item))
       } else if (item.hasOwnProperty('folder') && item.folder === true) {
-        this.items.push(new Category(item.name, item.items))
+        this.items.unshift(new Category(item.name, item.items))
       }
     }
   }

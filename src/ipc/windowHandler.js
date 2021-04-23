@@ -36,7 +36,6 @@ ipcMain.handle(ipc.getAllSettings, async () => {
 
 ipcMain.handle(ipc.getProgramsHTML, async (event, payload = {}) => {
   let html
-  console.log(payload)
   if (payload.refreshCache == null || !payload.refreshCache) {
     html = await StoreManagerObj.getProgramListCache()
   }

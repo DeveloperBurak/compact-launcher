@@ -18,14 +18,8 @@ export const readVdf = (file) => {
   })
 }
 
-export const fileExists = (file) => {
-  return new Promise((resolve, reject) => {
-    if (fs.existsSync(file)) {
-      resolve(true)
-    } else {
-      resolve(false)
-    }
-  })
+export const fileExists = async (file) => {
+  return fs.existsSync(file);
 }
 
 export const removeFile = (path) => {
