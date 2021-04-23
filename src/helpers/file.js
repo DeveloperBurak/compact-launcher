@@ -1,35 +1,29 @@
 const fs = require('fs')
 import { parse } from '@node-steam/vdf'
+import { devLog } from './console'
 import { isWindows } from './os'
 
-export const readVdf = (file) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(file, (err, data) => {
-      if (err) {
-        if (err.code === 'ENOENT') {
-          reject(file + ' does not exist')
-          return
-        }
-        reject(err)
-      }
-      let fileContent = data.toString('utf8')
-      resolve(parse(fileContent))
-    })
-  })
+export const readVdf = async (file) => {
+  try {
+    const fileContent = await fs.promises.readFile(file)
+    return parse(fileContent.toString('utf8'))
+  } catch (e) {
+    throw e
+  }
 }
 
 export const fileExists = async (file) => {
-  return fs.existsSync(file);
+  return fs.existsSync(file)
 }
 
-export const removeFile = (path) => {
-  return new Promise((resolve, reject) => {
-    fs.unlink(path, (err) => {
-      if (err === null) {
-        resolve(true)
-      }
-    })
-  })
+export const removeFile = async (path) => {
+  try {
+    fs.promises.unlink(path)
+    return true
+  } catch (e) {
+    devLog(e)
+    return false
+  }
 }
 
 export const isValidImageExt = (ext) => {

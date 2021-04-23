@@ -4,6 +4,7 @@ import path from 'path'
 import { StoreManagerObj } from '../background'
 import file from '../configs/file'
 import { devLog, errorLog } from '../helpers/console'
+import { isProduction } from '../helpers/env'
 import { isValidImageExt, isValidShortcutExt } from '../helpers/file'
 import { mkdirIfNotExists } from '../helpers/folder'
 class FileManager {
@@ -18,9 +19,11 @@ class FileManager {
   createRequiredFolders = () => {
     const folders = Object.values(this.folder)
     for (let folder of folders) {
-      mkdirIfNotExists(folder).then((result) => {
-        if (!result) {
-          devLog(folder)
+      mkdirIfNotExists(folder).catch((error) => {
+        if (isProduction()) {
+          // TODO warn the user about error and exit the program
+        } else {
+          devLog(error)
         }
       })
     }
