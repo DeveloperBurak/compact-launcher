@@ -98,6 +98,9 @@ $(() => {
   $('#btn-openToolsWindow').on('click', function () {
     ipcRenderer.send(ipc.openToolsWindow)
   })
+  $('#program-preview').on('error', function (e) {
+    $(this).hide()
+  })
 
   const body = $('body')
   body.on('click', '.btn.list.dropdown-button', (e) => {
