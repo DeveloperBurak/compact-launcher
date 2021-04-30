@@ -1,3 +1,5 @@
+
+
 @import '~bootstrap/dist/css/bootstrap.min';
 @import '~alertifyjs/build/css/alertify.min';
 @import '~alertifyjs/build/css/themes/bootstrap.min';
@@ -89,3 +91,13 @@ a {
     opacity: 1;
   }
 }
+
+// TODO delete them
+.primary-bg {
+  background-color: darkcyan;
+}
+
+.theme-text {
+  color: white;
+}
+

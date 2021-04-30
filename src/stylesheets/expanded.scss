@@ -24,7 +24,7 @@ ul {
 }
 
 .dropdown-list {
-  margin: 10px;
+  margin: 10px 0 10px 10px;
 }
 
 .dropdown-list > li {
@@ -45,12 +45,12 @@ ul {
   color: white;
   width: 100%;
   border-radius: 25px;
-  padding: 5px;
+  padding-left: 5px;
   margin: 2px 0;
 }
 
 .btn.list.active {
-  background-color: darkcyan;
+  background-color: darkcyan; // TODO theme
 }
 
 button:focus {
@@ -60,7 +60,7 @@ button:focus {
 }
 
 .btn.program {
-  color: #ddd;
+  color: #ddd; // TODO theme
   font-size: 13px;
   position: relative;
   z-index: 1;
@@ -72,7 +72,7 @@ button:focus {
 }
 
 .btn.program:hover {
-  color: darkcyan;
+  color: darkcyan !important; // TODO theme
 }
 
 .dropdown-button {

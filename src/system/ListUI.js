@@ -42,7 +42,7 @@ class ListUI {
   generateList = (category, inner = false, level = 0) => {
     let html = ''
     if (category != null) {
-      html += `<li key="${category.name}" style="padding-left: ${20 * level}px">
+      html += `<li key="${category.name}" style="padding-left:${level === 0 ? 0 : '0.375rem'} ">
       <button class="btn list dropdown-button secondary-bg">${category.name}</button>
       <ul class="dropdown-list${inner === true ? ' inner' : ''}" style="padding-left:"${15 * level}px">`
       if (category.items !== null) {
