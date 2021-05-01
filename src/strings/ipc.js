@@ -14,9 +14,12 @@ export const removeProgram = 'program:remove'
 export const removeImageFromProgram = 'program:remove:image'
 export const addImageFromProgram = 'program:add:image'
 
+export const openCollapsedWindow = 'window:open:collapsed'
 export const openExpandWindow = 'window:open:expand'
 export const openSettingWindow = 'window:open:settings'
+export const closeSettingWindow = 'window:close:settings'
 export const openToolsWindow = 'window:open:tools'
+export const closeToolsWindow = 'window:close:tools'
 export const openSubWindow = 'window:open:subWindow' // TODO continue this
 
 export const closeExpandWindow = 'window:close:expanded'

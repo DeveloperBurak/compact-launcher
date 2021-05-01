@@ -12,12 +12,14 @@ import ListUI from './system/ListUI'
 import { PreferenceManager } from './system/PreferenceManager'
 import ProgramHandler from './system/ProgramHandler'
 import StoreManager from './system/StoreManager'
+import User from './system/User'
 import { setTray } from './system/System'
 import { WindowHandler } from './system/WindowHandler'
 
 // app wide objects. use these objects for app wide actions
 export const ForegroundProgramTrackerObj = new ForegroundProgramTracker()
 export const WindowHandlerObj = new WindowHandler()
+export const AppUser = new User()
 export const PreferenceManagerObj = new PreferenceManager()
 export const ListUIObj = new ListUI()
 export const ProgramHandlerObj = new ProgramHandler()
@@ -30,7 +32,11 @@ if (isLinux() || isWindows()) {
 
 export let tray // system tray
 app.on('ready', () => {
-  WindowHandlerObj.openCollapsedWindow()
+  if (AppUser.isFirst) {
+    WindowHandlerObj.openWelcomeWindow()
+  } else {
+    WindowHandlerObj.openCollapsedWindow()
+  }
   FileManager.createRequiredFolders()
   try {
     // it may throw exception on linux

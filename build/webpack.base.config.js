@@ -24,6 +24,7 @@ module.exports = (env) => {
       expanded: './src/views/expanded.js',
       settings: './src/views/settings.js',
       tools: './src/views/tools.js',
+      welcome: './src/views/welcome.js',
     },
     output: {
       filename: '[name].js',

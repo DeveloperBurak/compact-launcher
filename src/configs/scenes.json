@@ -1,12 +1,12 @@
 {
-  "collapsedScreen": {
+  "collapsed": {
     "width": 20,
     "height": 15,
     "transparent": false,
     "type": "toolbar",
     "devTools": false
   },
-  "expandedScreen": {
+  "expanded": {
     "transparent": true,
     "alwaysOnTop": true,
     "devTools": true,
@@ -31,7 +31,13 @@
     "title": "Settings",
     "skipTaskbar": false
   },
-
+  "welcomeScreen": {
+    "width": "30%",
+    "height": "40%",
+    "title": "Welcome",
+    "alwaysOnTop": false,
+    "devTools": true
+  },
   "toolsScreen": {
     "center": true,
     "frame": true,

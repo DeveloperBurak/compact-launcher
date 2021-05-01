@@ -2,12 +2,14 @@ import FileManager from './FileManager'
 import path from 'path'
 import fs from 'fs'
 import { fileExists } from '../helpers/file'
+import { AppUser } from '../background'
 
 export class PreferenceManager {
   constructor() {
     this.preferencePath = path.join(FileManager.getPathOf('userdata'), 'preferences.json')
     fileExists(this.preferencePath).then((exists) => {
       if (!exists) {
+        AppUser.setFirst(true)
         fs.writeFileSync(this.preferencePath, JSON.stringify({}))
       }
     })

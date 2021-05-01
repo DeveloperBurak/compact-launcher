@@ -1,23 +1,31 @@
-import Steam from "./Steam";
+import Steam from './Steam'
+import fs from 'fs'
 
-class User {
+export default class User {
+  constructor() {
+    this.isFirst = false
+  }
   async read(file) {
-    fs.readFile(file, {encoding: 'utf-8'}, function (err, data) {
+    fs.readFile(file, { encoding: 'utf-8' }, function (err, data) {
       if (!err) {
-        return data;
+        return data
       } else {
-        console.log(err);
+        console.log(err)
       }
-    });
+    })
+  }
+
+  async setFirst(first = false) {
+    if (first) {
+      this.isFirst = first
+    }
   }
 
   async getSteamUser() {
     return new Promise((resolve, reject) => {
-      Steam.getInstalledPath().then(path => {
-        resolve(path);
+      Steam.getInstalledPath().then((path) => {
+        resolve(path)
       })
-    });
+    })
   }
 }
-
-export default new User();

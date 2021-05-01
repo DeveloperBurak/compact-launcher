@@ -1,8 +1,7 @@
 import { ipcMain } from 'electron'
-import { ListUIObj, PreferenceManagerObj, ProgramHandlerObj, StoreManagerObj, WindowHandlerObj } from '../background'
+import { ListUIObj, PreferenceManagerObj, ProgramHandlerObj, StoreManagerObj, WindowHandlerObj, AppUser } from '../background'
 import * as ipc from '../strings/ipc'
 import Timer from '../system/Timer'
-import User from '../system/User'
 
 ipcMain.on(ipc.openExpandWindow, () => {
   WindowHandlerObj.openExpandedWindow()
@@ -12,16 +11,33 @@ ipcMain.on(ipc.closeExpandWindow, () => {
   WindowHandlerObj.openCollapsedWindow()
 })
 
+ipcMain.on(ipc.openCollapsedWindow, (err, closeAll) => {
+  if (closeAll) {
+    WindowHandlerObj.getAllWindows().forEach((window) => {
+      window.close()
+    })
+  }
+  WindowHandlerObj.openCollapsedWindow()
+})
+
 ipcMain.on(ipc.openSettingWindow, () => {
   WindowHandlerObj.openSettingsWindow()
+})
+
+ipcMain.on(ipc.closeSettingWindow, (err) => {
+  if (WindowHandlerObj.settingsWindow !== null) WindowHandlerObj.settingsWindow.close()
 })
 
 ipcMain.on(ipc.openToolsWindow, () => {
   WindowHandlerObj.openToolsWindow()
 })
 
+ipcMain.on(ipc.closeToolsWindow, () => {
+  if (WindowHandlerObj.toolsWindow !== null) WindowHandlerObj.toolsWindow.close()
+})
+
 ipcMain.on(ipc.isSteamExists, () => {
-  User.getSteamUser().then((steamPath) => {
+  AppUser.getSteamUser().then((steamPath) => {
     WindowHandlerObj.expandedWindow.webContents.send(ipc.isSteamUserExists, steamPath !== null)
   })
 })

@@ -1,7 +1,8 @@
-import { BrowserWindow, screen } from 'electron'
+import { BrowserWindow, Menu, screen } from 'electron'
 import path from 'path'
 import { PreferenceManagerObj, StoreManagerObj } from '../background'
 import scenes from '../configs/scenes.json'
+import { devLog } from '../helpers/console'
 import { isDev } from '../helpers/env'
 import { isLinux, isWindows } from '../helpers/os'
 import { getSteamUser, themeInfo } from '../strings/ipc'
@@ -15,10 +16,33 @@ export class WindowHandler {
     this.expandedWindow = null
     this.settingsWindow = null
     this.toolsWindow = null
+    this.welcomeWindow = null
+  }
+  openWelcomeWindow = () => {
+    // TODO remove this second monitor configs.
+    let displays = screen.getAllDisplays()
+    let externalDisplay = displays.find((display) => {
+      return display.bounds.x !== 0 || display.bounds.y !== 0
+    })
+    let welcomeWindow = this.createWindow('welcome', scenes.welcomeScreen)
+    welcomeWindow.setBounds({
+      x: externalDisplay.bounds.x + externalDisplay.size.width / 2 - welcomeWindow.getSize()[0] / 2, //center
+      y: externalDisplay.bounds.y + externalDisplay.size.height / 2 - welcomeWindow.getSize()[1] / 2,
+    })
+    welcomeWindow.loadURL(path.join(__dirname, 'views/welcome.html'))
+    Menu.setApplicationMenu(null)
+    welcomeWindow.on('ready-to-show', () => {
+      welcomeWindow.show()
+      if (this.expandedWindow != null) this.expandedWindow.close()
+      this.welcomeWindow = welcomeWindow
+    })
+    welcomeWindow.on('closed', () => {
+      this.welcomeWindow = null
+    })
   }
   openCollapsedWindow = () => {
     if (this.collapsedWindow == null) {
-      let collapsedWindow = this.createWindow('collapsed', scenes.collapsedScreen)
+      let collapsedWindow = this.createWindow('collapsed', scenes.collapsed)
       collapsedWindow.loadURL(path.join(__dirname, 'views/collapsed.html'))
       collapsedWindow.on('ready-to-show', () => {
         collapsedWindow.show()
@@ -35,7 +59,7 @@ export class WindowHandler {
   }
   openExpandedWindow = () => {
     if (this.expandedWindow == null) {
-      let expandedWindow = this.createWindow('expanded', scenes.expandedScreen)
+      let expandedWindow = this.createWindow('expanded', scenes.expanded)
       expandedWindow.loadURL(path.join(__dirname, 'views/expanded.html'))
       expandedWindow.on('ready-to-show', () => {
         Steam.getUser()
@@ -146,11 +170,13 @@ export class WindowHandler {
       }
     }
     const alwaysOnTop = PreferenceManagerObj.get(setting.alwaysOnTop)
-    if (alwaysOnTop != null) {
-      windowOptions.alwaysOnTop = alwaysOnTop
-    } else if (options.alwaysOnTop) {
+    if (typeof options.alwaysOnTop !== typeof undefined) {
       windowOptions.alwaysOnTop = options.alwaysOnTop
+    } else if (alwaysOnTop != null) {
+      windowOptions.alwaysOnTop = alwaysOnTop
     }
+
+    // TODO add multimonitor support
     if (windowOptions.center == null) {
       windowOptions.x = options.x ?? 0
       windowOptions.y = options.y ?? 0
