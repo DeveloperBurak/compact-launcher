@@ -130,6 +130,22 @@ button:focus {
   animation: rotating 2s linear infinite;
 }
 
+#server-image-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  max-width: 300px;
+  overflow: auto;
+  li {
+    margin: 10px;
+    width: 200px;
+    height: 200px;
+    img {
+      width: 100%;
+    }
+  }
+}
+
 .modal {
   display: flex;
   justify-content: center;

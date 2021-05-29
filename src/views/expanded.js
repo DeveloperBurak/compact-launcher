@@ -101,8 +101,21 @@ $(() => {
   $('#program-preview').on('error', function (e) {
     $(this).hide()
   })
+  $('#program-preview').on('load', function () {
+    $(this).show()
+  })
 
   const body = $('body')
+  body.on('click', '.btn-server-image', (e) => {
+    const button = $(e.currentTarget)
+    ipcRenderer.invoke(ipc.selectImageServer, { docId: button.attr('doc-id'), programName: button.attr('program-name') }).then((downloadedPath) => {
+      if (downloadedPath != null) {
+        $('button.program[programname="' + button.attr('program-name') + '"]').attr('image', downloadedPath)
+        $('#program-preview').show() // it may hidden because of gets error, look for on('error') for this element
+      }
+      $('#server-image-selector').addClass('d-none')
+    })
+  })
   body.on('click', '.btn.list.dropdown-button', (e) => {
     const button = $(e.currentTarget)
     const dropdownLists = button.siblings('.dropdown-list')
@@ -187,24 +200,37 @@ $(() => {
       image: {
         name: 'Image',
         items: {
-          add: {
+          newImage: {
             name: 'New Image',
-            callback: function (key, opt) {
-              remote.dialog.showOpenDialog(
-                window,
-                {
-                  properties: ['openFile'],
+            items: {
+              server: {
+                name: 'From Server',
+                callback: function (key, opt) {
+                  const button = $(opt.$trigger).children('.btn.program')
+                  const programName = button.attr('programname')
+                  fetchImagesFromServer(programName)
                 },
-                function (file) {
-                  if (file !== undefined) {
-                    const button = $(opt.$trigger).children('.btn.program')
-                    ipcRenderer.send(ipc.addImageFromProgram, {
-                      file: file[0],
-                      name: button.attr('programName'),
-                    })
-                  }
+              },
+              local: {
+                name: 'From PC',
+                callback: function (key, opt) {
+                  remote.dialog.showOpenDialog(
+                    window,
+                    {
+                      properties: ['openFile'],
+                    },
+                    function (file) {
+                      if (file !== undefined) {
+                        const button = $(opt.$trigger).children('.btn.program')
+                        ipcRenderer.send(ipc.addImageFromProgram, {
+                          file: file[0],
+                          name: button.attr('programName'),
+                        })
+                      }
+                    },
+                  )
                 },
-              )
+              },
             },
           },
           remove: {
@@ -233,4 +259,28 @@ function renderList(payload = {}) {
       $('.dropdown-list').hide()
     })
   }, 10) // Make feel that the list is refreshed to user
+}
+
+function fetchImagesFromServer(programName) {
+  ipcRenderer.invoke(ipc.fetchImageFromServer, { programName: programName }).then((result) => {
+    const images = result.data.program.images
+
+    // TODO catch the what time left and continue to the timeout after model is closed
+    clearTimeout(closingTimeOut) // if user gets there by accidently, don't expand the screen immediatly
+    closingTimeOut = null
+
+    if (images.length > 0) {
+      $('#server-image-selector').removeClass('d-none')
+    }
+    $('#server-image-list').children('li').remove()
+    for (let i = 0; i < 10; i++) {
+      $('#server-image-list').append(
+        `<li>
+          <button class="btn btn-server-image" program-name="${programName}" doc-id="${images[i]._id}">
+            <img src="${images[i].path}" />
+          </button>
+        </li>`,
+      )
+    }
+  })
 }
