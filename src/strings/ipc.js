@@ -42,6 +42,9 @@ export const timerStopped = 'tools:timer:stopped'
 export const timerRequestTime = 'tools:timer:request:time' // send a request from client
 export const timerRemainingTime = 'tools:timer:time'
 
+export const fetchImageFromServer = 'server:program:fetch'
+export const selectImageServer = 'server:program:select'
+
 export const themeInfo = 'theme:info'
 
 export const moveFile = 'file:move'

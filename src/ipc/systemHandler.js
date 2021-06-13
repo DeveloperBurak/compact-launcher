@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { ForegroundProgramTrackerObj, PreferenceManagerObj, StoreManagerObj } from '../background'
+import { ForegroundProgramTrackerObj, PreferenceManagerObj, programImageManager, StoreManagerObj } from '../background'
 import { cacheProgramHTML } from '../strings/store'
 import { devLog } from '../helpers/console'
 import { removeFile } from '../helpers/file'
@@ -9,6 +9,7 @@ import Program from '../system/Program'
 import Steam from '../system/Steam'
 import { setAutoLaunch } from '../system/System'
 import Timer from '../system/Timer'
+import { toURL } from '../helpers/url'
 
 ipcMain.on(ipc.systemLog, (err, value) => {
   devLog(value)
@@ -75,6 +76,18 @@ ipcMain.on(ipc.moveFile, (err, files) => {
   for (let file of files) {
     FileManager.moveToOurDocument(file)
   }
+})
+
+ipcMain.handle(ipc.fetchImageFromServer, async (err, payload) => {
+  return await programImageManager.fetchImage(toURL(payload.programName))
+})
+
+ipcMain.handle(ipc.selectImageServer, async (err, payload) => {
+  const response = await programImageManager.selectProgram(payload.docId, payload.programName)
+  if (response.statusCode === 200) {
+    return response.filePath
+  }
+  return null
 })
 
 ipcMain.on(ipc.disconnectUser, (err, data) => {

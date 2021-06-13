@@ -15,6 +15,8 @@ import StoreManager from './system/StoreManager'
 import User from './system/User'
 import { setTray } from './system/System'
 import { WindowHandler } from './system/WindowHandler'
+import ProgramImageManager from './system/ProgramImageManager'
+import { SERVER_URL } from './configs/app.json'
 
 // app wide objects. use these objects for app wide actions
 export const ForegroundProgramTrackerObj = new ForegroundProgramTracker()
@@ -24,6 +26,7 @@ export const PreferenceManagerObj = new PreferenceManager()
 export const ListUIObj = new ListUI()
 export const ProgramHandlerObj = new ProgramHandler()
 export const StoreManagerObj = new StoreManager()
+export const programImageManager = new ProgramImageManager(SERVER_URL + 'api/programs')
 
 if (isLinux() || isWindows()) {
   app.commandLine.appendSwitch('enable-transparent-visuals') // fix the tranparent issue

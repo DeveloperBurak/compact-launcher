@@ -2,7 +2,7 @@
   "name": "compact-launcher",
   "productName": "Compact Launcher",
   "description": "Compact Launcher for Your Programs",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": true,
   "author": "Burak Eren Karasu <developerburakeren@gmail.com>",
   "copyright": "PPROGA",
@@ -52,6 +52,7 @@
     "jquery": "^3.4.1",
     "jquery-contextmenu": "^2.9.0",
     "mkdirp": "^1.0.4",
+    "node-fetch": "^2.6.1",
     "popper.js": "^1.16.1",
     "progressbar.js": "^1.1.0",
     "winreg": "^1.2.4"

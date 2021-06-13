@@ -20,15 +20,15 @@ export class WindowHandler {
   }
   openWelcomeWindow = () => {
     // TODO remove this second monitor configs.
-    let displays = screen.getAllDisplays()
-    let externalDisplay = displays.find((display) => {
-      return display.bounds.x !== 0 || display.bounds.y !== 0
-    })
+    // let displays = screen.getAllDisplays()
+    // let externalDisplay = displays.find((display) => {
+    //   return display.bounds.x !== 0 || display.bounds.y !== 0
+    // })
     let welcomeWindow = this.createWindow('welcome', scenes.welcomeScreen)
-    welcomeWindow.setBounds({
-      x: externalDisplay.bounds.x + externalDisplay.size.width / 2 - welcomeWindow.getSize()[0] / 2, //center
-      y: externalDisplay.bounds.y + externalDisplay.size.height / 2 - welcomeWindow.getSize()[1] / 2,
-    })
+    // welcomeWindow.setBounds({
+    //   x: externalDisplay.bounds.x + externalDisplay.size.width / 2 - welcomeWindow.getSize()[0] / 2, //center
+    //   y: externalDisplay.bounds.y + externalDisplay.size.height / 2 - welcomeWindow.getSize()[1] / 2,
+    // })
     welcomeWindow.loadURL(path.join(__dirname, 'views/welcome.html'))
     Menu.setApplicationMenu(null)
     welcomeWindow.on('ready-to-show', () => {
