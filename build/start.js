@@ -1,11 +1,12 @@
-var run = require('parallel-webpack').run
-const config = require.resolve('./webpack.app.config')
-run(config, {
-  watch: true,
-  stats: true, // defaults to false
-  maxConcurrentWorkers: 2, // use 2 workers
-})
-// const compiler = webpack(config(env))
-// compiler.watch({}, (err, stats) => {
-//   if (err) console.log(err)
-// })
+const childProcess = require('child_process');
+const electron = require('electron');
+const webpack = require('webpack');
+const config = require('./webpack.app.config');
+
+const compiler = webpack(config);
+
+compiler.run((err) => {
+  if (!err) {
+    childProcess.spawn(electron, ['.'], { stdio: 'inherit' });
+  }
+});

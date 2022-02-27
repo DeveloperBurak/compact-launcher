@@ -1,45 +1,52 @@
-import { ipcRenderer } from 'electron'
-import { getSetting, moveFile, openExpandWindow } from '../strings/ipc'
-import { expandOnHover } from '../strings/settings'
-import './app'
+/* global window, document */
 
-const expandButton = document.getElementById('expandButton')
+import { getSetting, moveFile, openExpandWindow } from '../strings/ipc';
+import { expandOnHover } from '../strings/settings';
+import './app';
 
-ipcRenderer.invoke(getSetting, expandOnHover).then((expandOnHover) => {
-  if (expandOnHover === true) {
-    let openingTimeout = null
+const expandButton = document.getElementById('expandButton');
+
+const expand = () => {
+  document.getElementById('rocket').classList.add('launch'); // rocket launch animation
+  window.api.send(openExpandWindow);
+};
+
+const moveFileHandler = (event) => {
+  // file drop handler
+  event.preventDefault();
+  event.stopPropagation();
+  const files = [];
+  for (const f of event.dataTransfer.files) {
+    // get the
+    files.push(f.path);
+  }
+  window.api.send(moveFile, files); // send the absolute paths of files to node server for moving
+  return false;
+};
+
+const expandOnHoverHandler = async () => {
+  const isExpandOnHover = await window.api.invoke(getSetting, expandOnHover);
+  if (isExpandOnHover) {
+    let openingTimeout = null;
     expandButton.addEventListener('mouseleave', () => {
-      clearTimeout(openingTimeout) // if user gets there by accidently, don't expand the screen immediatly
-      openingTimeout = null
-    })
+      clearTimeout(openingTimeout); // if user gets there by accidently, don't expand the screen immediatly
+      openingTimeout = null;
+    });
     expandButton.addEventListener('mouseenter', () => {
       openingTimeout = setTimeout(() => {
-        expand()
-      }, 250)
-    })
+        expand();
+      }, 250);
+    });
   } else {
-    expandButton.addEventListener('click', () => {
-      expand()
-    })
+    expandButton.addEventListener('click', () => expand());
   }
-})
+};
 
-function expand() {
-  document.getElementById('rocket').classList.add('launch') // rocket launch animation
-  ipcRenderer.send(openExpandWindow)
-}
+expandOnHoverHandler();
 
-expandButton.addEventListener('drop', function (e) { // file drop handler
-  e.preventDefault() // 
-  e.stopPropagation() // 
-  let files = []
-  for (let f of e.dataTransfer.files) { // get the 
-    files.push(f.path)
-  }
-  ipcRenderer.send(moveFile, files) // send the absolute paths of files to node server for moving
-  return false
-})
-expandButton.addEventListener('dragover', function (e) {
-  e.preventDefault()
-  e.stopPropagation()
-})
+expandButton.addEventListener('drop', (event) => moveFileHandler(event));
+
+expandButton.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+});

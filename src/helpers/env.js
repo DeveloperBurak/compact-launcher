@@ -1,12 +1,6 @@
-import env from 'env'
-export const isDev = () => {
-  return env.name === 'development'
-}
+// eslint-disable-next-line import/no-unresolved
+import env from 'env';
 
-export const isTesting = () => {
-  return env.name === 'testing'
-}
-
-export const isProduction = () => {
-  return env.name === 'production'
-}
+export const isDev = () => env.name === 'development';
+export const isTesting = () => env.name === 'testing';
+export const isProduction = () => env.name === 'production';

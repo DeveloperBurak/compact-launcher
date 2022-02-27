@@ -1,76 +1,95 @@
-import activeWin from 'active-win'
-import fs from 'fs'
-import path from 'path'
-import { WindowHandlerObj } from '../background'
-import { fileExists } from '../helpers/file'
-import FileManager from './FileManager'
-class ForegroundProgramTracker {
+import activeWin from 'active-win';
+import EE from 'events';
+import fs from 'fs/promises';
+import path from 'path';
+import { writeFile } from '../helpers/file';
+import { isWindows } from '../helpers/os';
+import { getPathOf } from './FileManager';
+import WindowHandler from './WindowHandler';
+
+export default class ForegroundProgramTracker {
   constructor() {
-    this.blackList = [] // if the foreground program is in this list, change
-    this.activeProgram = null
-    this.forbiddenProgramsFile = path.join(FileManager.getPathOf('userdata'), 'forbidden-programs.json')
-    this.trackingInterval = null
-    fileExists(this.forbiddenProgramsFile).then((exists) => {
-      if (!exists) {
-        fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.blackList))
-      } else {
-        fs.readFile(this.forbiddenProgramsFile, (err, data) => {
-          this.blackList = JSON.parse(data.toString('utf8'))
-        })
+    EE.call(this);
+    this.blackList = [];
+    this.exludeForActivePrograms = ForegroundProgramTracker.excludeForActiveProgram();
+    this.activeProgram = null;
+    this.forbiddenProgramsFile = path.join(getPathOf('userdata'), 'forbidden-programs.json');
+    this.trackingInterval = null;
+  }
+
+  init = async () => {
+    let file;
+    try {
+      file = await fs.readFile(this.forbiddenProgramsFile);
+      if (file) {
+        this.blackList = JSON.parse(file.toString('utf8'));
       }
-    })
-  }
+      this.start();
+    } catch (err) {
+      await writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList), { flag: 'w' });
+    }
+  };
 
-  start(interval = 1000) {
+  static excludeForActiveProgram = () => {
+    if (isWindows()) {
+      return ['Compact Launcher', 'Electron'];
+    }
+    return [];
+  };
+
+  start = (interval = 2000) => {
     this.trackingInterval = setInterval(async () => {
-      this.watching()
-    }, interval)
-  }
+      this.watch();
+    }, interval);
+  };
 
-  stop() {
-    // stop timer
-    if (this.trackingInterval != null) clearInterval(this.trackingInterval)
-  }
+  stop = () => {
+    if (this.trackingInterval != null) clearInterval(this.trackingInterval);
+  };
 
-  addToBlacklist() {
+  addToBlacklist = () => {
     if (this.blackList.indexOf(this.activeProgram) === -1) {
-      this.blackList.push(this.activeProgram)
-      fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.blackList))
+      this.blackList.push(this.activeProgram);
+      fs.writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList));
+      this.setAlwaysOnTop();
+      this.emit('forceUpdateTrayMenu');
     }
-  }
+  };
 
-  removeFromBlacklist() {
+  removeFromBlacklist = () => {
     if (this.blackList.indexOf(this.activeProgram) !== -1) {
-      this.blackList.splice(this.blackList.indexOf(this.activeProgram), 1)
-      fs.writeFileSync(this.forbiddenProgramsFile, JSON.stringify(this.blackList))
+      this.blackList.splice(this.blackList.indexOf(this.activeProgram), 1);
+      fs.writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList));
+      this.setAlwaysOnTop();
+      this.emit('forceUpdateTrayMenu');
     }
-  }
-  async watching() {
-    const foregroundProgram = await activeWin()
+  };
+
+  watch = async () => {
+    const foregroundProgram = await activeWin();
     if (
-      foregroundProgram != null &&
-      foregroundProgram.owner.name !== 'Compact Launcher.exe' &&
-      foregroundProgram.owner.name !== 'electron.exe' &&
-      foregroundProgram.owner.name !== 'Compact Launcher' &&
+      foregroundProgram &&
+      !this.exludeForActivePrograms.includes(foregroundProgram.owner.name) &&
       this.activeProgram !== foregroundProgram.owner.name
     ) {
-      this.activeProgram = foregroundProgram.owner.name
-      this.setAlwaysOnTop()
+      this.activeProgram = foregroundProgram.owner.name;
+      this.emit('forceUpdateTrayMenu');
+      this.setAlwaysOnTop();
     }
-  }
+  };
 
   /**
    * @param force - force the behaviour for always on top property
    */
-  setAlwaysOnTop(force) {
-    WindowHandlerObj.getAllWindows().forEach((window) => {
-      window.setAlwaysOnTop(force ?? this.blackList.indexOf(this.activeProgram) == -1, 'screen-saver') // apply this rule for all windows.
-    })
-  }
+  setAlwaysOnTop = (force) => {
+    WindowHandler.getAllWindows().forEach((window) => {
+      window.setAlwaysOnTop(force ?? this.blackList.indexOf(this.activeProgram) === -1, 'screen'); // apply this rule for all windows.
+    });
+  };
 
-  addToBlacklist(app) {
-    this.blackList.push(app)
-  }
+  isInBlacklist = (program) => this.blackList.indexOf(program) !== -1;
+
+  addSpecificProgramToBlacklist = (app) => this.blackList.push(app);
+
+  getActiveProgram = () => this.activeProgram;
 }
-
-export default ForegroundProgramTracker

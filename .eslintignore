@@ -3,12 +3,19 @@ node_modules
 .DS_Store
 Thumbs.db
 *.log
+*.css
 
 /dist
 /temp
 
-/.idea
-
 # ignore everything in 'app' folder what had been generated from 'src' folder
 /app/*.js
 /app/**/*.map
+/app/views/*.html
+
+LICENSE
+package-lock.json
+package.json
+.babelrc
+.editorconfig
+.eslintrc.json

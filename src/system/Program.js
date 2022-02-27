@@ -1,24 +1,14 @@
-import FileManager from "./FileManager";
-import {fileExists, removeFile} from "../helpers/file";
+import { fileExists, removeFile } from '../helpers/file';
+import { getPathOf } from './FileManager';
 
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
 
-class Program {
-
-  addNewImage(source, name) {
-    const image = path.join(FileManager.getPathOf('images'), name + '.jpg');
-    fileExists(image).then(async exists => {
-      if (exists) {
-        await removeFile(image);
-      }
-      fs.copyFile(source, image, (err) => {
-        if (err) throw err;
-        console.log('image copied');
-      });
-    });
-
+export const addNewImage = async ({ source, name }) => {
+  const image = path.join(getPathOf('images'), `${name}.jpg`);
+  const exists = await fileExists(image);
+  if (exists) {
+    await removeFile(image);
   }
-}
-
-export default new Program;
+  await fs.copyFile(source, image);
+};

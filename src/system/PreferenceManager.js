@@ -1,32 +1,38 @@
-import FileManager from './FileManager'
-import path from 'path'
-import fs from 'fs'
-import { fileExists } from '../helpers/file'
-import { AppUser } from '../background'
+import path from 'path';
+import fs from 'fs/promises';
+import { writeFile } from '../helpers/file';
+import { defaults as defaultPreferences } from '../configs/preferences.json';
+import { getPathOf } from './FileManager';
 
-export class PreferenceManager {
-  constructor() {
-    this.preferencePath = path.join(FileManager.getPathOf('userdata'), 'preferences.json')
-    fileExists(this.preferencePath).then((exists) => {
-      if (!exists) {
-        AppUser.setFirst(true)
-        fs.writeFileSync(this.preferencePath, JSON.stringify({}))
-      }
-    })
+export default class PreferenceManager {
+  constructor({ userManager }) {
+    this.preferencePath = path.join(getPathOf('userdata'), 'preferences.json');
+    this.userManager = userManager;
+    this.preferences = {};
   }
-  get = async (name) => {
-    const file = await fs.promises.readFile(this.preferencePath)
-    const preferences = await JSON.parse(file.toString('utf8'))
-    return typeof preferences[name] === 'undefined' ? null : preferences[name]
-  }
+
+  get = (name) => this.preferences[name];
+
+  getAll = () => this.preferences;
+
+  init = async () => {
+    try {
+      await fs.access(this.preferencePath);
+    } catch (err) {
+      writeFile(this.preferencePath, JSON.stringify(defaultPreferences), { flag: 'w' });
+    }
+
+    try {
+      const file = await fs.readFile(this.preferencePath);
+      this.preferences = JSON.parse(file.toString('utf8'));
+    } catch (err) {
+      this.preferences = defaultPreferences;
+      this.userManager.setFirst(true);
+    }
+  };
+
   set = async (name, value) => {
-    const file = await fs.promises.readFile(this.preferencePath)
-    let preferences = await JSON.parse(file.toString('utf8'))
-    preferences[name] = value
-    fs.writeFileSync(this.preferencePath, JSON.stringify(preferences))
-  }
-  getAll = async () => {
-    const file = await fs.promises.readFile(this.preferencePath)
-    return await JSON.parse(file.toString('utf8'))
-  }
+    this.preferences[name] = value;
+    writeFile(this.preferencePath, JSON.stringify(this.preferences));
+  };
 }

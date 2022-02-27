@@ -1,75 +1,57 @@
-import { ipcMain } from 'electron'
-import { ListUIObj, PreferenceManagerObj, ProgramHandlerObj, StoreManagerObj, WindowHandlerObj, AppUser } from '../background'
-import * as ipc from '../strings/ipc'
-import Timer from '../system/Timer'
+import { ipcMain } from 'electron';
+import { preferenceManager, programHandler, storeManager, windowHandler, userManager, timer } from '../ioc';
+import WindowHandler from '../system/WindowHandler';
+import * as ipc from '../strings/ipc';
+import ListUI from '../system/ListUI';
 
-ipcMain.on(ipc.openExpandWindow, () => {
-  WindowHandlerObj.openExpandedWindow()
-})
-
-ipcMain.on(ipc.closeExpandWindow, () => {
-  WindowHandlerObj.openCollapsedWindow()
-})
+ipcMain.on(ipc.openExpandWindow, () => windowHandler.openExpandedWindow());
+ipcMain.on(ipc.closeExpandWindow, () => windowHandler.openCollapsedWindow());
+ipcMain.on(ipc.openSettingWindow, () => windowHandler.openSettingsWindow());
+ipcMain.handle(ipc.getSetting, (err, name) => preferenceManager.get(name));
+ipcMain.on(ipc.openToolsWindow, () => windowHandler.openToolsWindow());
+ipcMain.handle(ipc.getAllSettings, async () => preferenceManager.getAll());
+ipcMain.on(ipc.timerRequestTime, () => windowHandler.toolsWindow.webContents.send(ipc.timerRemainingTime, timer.getRemainingTime()));
 
 ipcMain.on(ipc.openCollapsedWindow, (err, closeAll) => {
   if (closeAll) {
-    WindowHandlerObj.getAllWindows().forEach((window) => {
-      window.close()
-    })
+    WindowHandler.getAllWindows().forEach((window) => {
+      window.close();
+    });
   }
-  WindowHandlerObj.openCollapsedWindow()
-})
+  windowHandler.openCollapsedWindow();
+});
 
-ipcMain.on(ipc.openSettingWindow, () => {
-  WindowHandlerObj.openSettingsWindow()
-})
-
-ipcMain.on(ipc.closeSettingWindow, (err) => {
-  if (WindowHandlerObj.settingsWindow !== null) WindowHandlerObj.settingsWindow.close()
-})
-
-ipcMain.on(ipc.openToolsWindow, () => {
-  WindowHandlerObj.openToolsWindow()
-})
+ipcMain.on(ipc.closeSettingWindow, () => {
+  if (windowHandler.settingsWindow !== null) windowHandler.settingsWindow.close();
+});
 
 ipcMain.on(ipc.closeToolsWindow, () => {
-  if (WindowHandlerObj.toolsWindow !== null) WindowHandlerObj.toolsWindow.close()
-})
+  if (windowHandler.toolsWindow !== null) windowHandler.toolsWindow.close();
+});
 
-ipcMain.on(ipc.isSteamExists, () => {
-  AppUser.getSteamUser().then((steamPath) => {
-    WindowHandlerObj.expandedWindow.webContents.send(ipc.isSteamUserExists, steamPath !== null)
-  })
-})
-
-ipcMain.handle(ipc.getSetting, (err, name) => {
-  return PreferenceManagerObj.get(name)
-})
-
-ipcMain.handle(ipc.getAllSettings, async () => {
-  return await PreferenceManagerObj.getAll()
-})
+ipcMain.on(ipc.isSteamExists, async () => {
+  const steamPath = await userManager.getSteamUser();
+  windowHandler.expandedWindow.webContents.send(ipc.isSteamUserExists, steamPath !== null);
+});
 
 ipcMain.handle(ipc.getProgramsHTML, async (event, payload = {}) => {
-  let html
+  let html;
   if (payload.refreshCache == null || !payload.refreshCache) {
-    html = await StoreManagerObj.getProgramListCache()
+    html = await storeManager.getProgramListCache();
   }
   if (html == null) {
-    html = await ListUIObj.getList('html')
-    StoreManagerObj.setProgramListCache(html)
+    html = await ListUI.getList('html');
+    storeManager.setProgramListCache(html);
   }
-  return html
-})
-ipcMain.on(ipc.timerRequestTime, () => {
-  WindowHandlerObj.toolsWindow.webContents.send(ipc.timerRemainingTime, Timer.getRemainingTime())
-})
-ipcMain.on(ipc.launchProgram, (err, file) => {
-  ProgramHandlerObj.launch(file)
-  WindowHandlerObj.expandedWindow.webContents.send(ipc.closeExpandWindow)
-})
+  return html;
+});
 
-Timer.on('osTimer-notify', () => {
-  const notification = Timer.getNotification()
-  WindowHandlerObj.getCurrentWindow().webContents.send(ipc.notificationReceived, notification)
-})
+ipcMain.on(ipc.launchProgram, (err, file) => {
+  programHandler.launch(file);
+  windowHandler.expandedWindow.webContents.send(ipc.closeExpandWindow);
+});
+
+timer.on('osTimer-notify', () => {
+  const notification = timer.getNotification();
+  WindowHandler.getCurrentWindow().webContents.send(ipc.notificationReceived, notification);
+});

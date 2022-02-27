@@ -1,45 +1,44 @@
-const promisify = require('util').promisify
-const path = require('path')
-const fs = require('fs')
-const readdirp = promisify(fs.readdir)
-const statp = promisify(fs.stat)
-let mkdirp = require('mkdirp')
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-await-in-loop */
+import fs from 'fs/promises';
+import path from 'path';
+import { promisify } from 'util';
 
-export async function scan(directoryName, results = []) {
-  let files = await readdirp(directoryName)
-  let i = 0
-  let j = 0
-  for (let file of files) {
-    let fullPath = path.join(directoryName, file)
-    let stat = await statp(fullPath)
+const readdirp = promisify(fs.readdir);
+const statp = promisify(fs.stat);
+
+export const scan = async (directoryName, results = []) => {
+  const files = await readdirp(directoryName);
+  let i = 0;
+  for (const file of files) {
+    const fullpath = path.join(directoryName, file);
+    const stat = await statp(fullpath);
     if (stat.isDirectory()) {
       results[i] = {
         name: file,
         folder: true,
-        items: await scan(fullPath, results[i]),
-      }
-      i++
+        items: await scan(fullpath, results[i]),
+      };
+      i += 1;
     } else {
-      const programName = path.parse(file).name // hello
-      const ext = path.parse(file).ext // .html
+      const { name } = path.parse(file);
+      const { ext } = path.parse(file);
       results[i] = {
-        name: programName,
-        fullpath: fullPath,
+        name,
+        fullpath,
         file: true,
-        ext: ext,
-      }
-      i++
+        ext,
+      };
+      i += 1;
     }
   }
-  return results
-}
+  return results;
+};
 
-export async function mkdirIfNotExists(folder) {
-  if (!fs.existsSync(folder)) {
-    try {
-      mkdirp(folder, { recursive: true })
-    } catch (e) {
-      throw e
-    }
+export const mkdirIfNotExists = async (folder) => {
+  try {
+    return await fs.access(folder);
+  } catch (err) {
+    return fs.mkdir(folder, { recursive: true });
   }
-}
+};

@@ -1,33 +1,33 @@
-import fetch from 'node-fetch'
-import { downloadFile } from '../helpers/external'
-import FileManager from './FileManager'
-import path from 'path'
-class ProgramImageManager {
+import fetch from 'node-fetch';
+import path from 'path';
+import { downloadFile } from '../helpers/external';
+import { getPathOf } from './FileManager';
+
+export default class ProgramImageManager {
   constructor(serviceUrl) {
-    this.externalService = serviceUrl
-  }
-  async fetchImage(slug) {
-    const serverResponse = await fetch(this.externalService + '/' + slug)
-    if (serverResponse.status === 200) {
-      return await serverResponse.json()
-    }
-    return { statusCode: serverResponse.status }
+    this.externalService = serviceUrl;
   }
 
-  async selectProgram(docId, programName) {
-    const serverResponse = await fetch(this.externalService + '/select', {
+  fetchImage = async (slug) => {
+    const serverResponse = await fetch(`${this.externalService}/${slug}`);
+    if (serverResponse.status === 200) {
+      return serverResponse.json();
+    }
+    return { statusCode: serverResponse.status };
+  };
+
+  selectProgram = async (docId, programName) => {
+    const serverResponse = await fetch(`${this.externalService}/select`, {
       method: 'post',
       body: JSON.stringify({ imageID: docId }),
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    })
-    let response = { statusCode: serverResponse.status }
+    });
+    const response = { statusCode: serverResponse.status };
     if (serverResponse.status === 200) {
-      const serverResponseJson = await serverResponse.json()
-      await downloadFile(serverResponseJson.data.path, path.join(FileManager.getPathOf('images'), programName + '.jpg'))
-      response.filePath = path.join(FileManager.getPathOf('images'), programName + '.jpg')
+      const serverResponseJson = await serverResponse.json();
+      await downloadFile(serverResponseJson.data.path, path.join(getPathOf('images'), `${programName}.jpg`));
+      response.filePath = path.join(getPathOf('images'), `${programName}.jpg`);
     }
-    return response
-  }
+    return response;
+  };
 }
-
-export default ProgramImageManager

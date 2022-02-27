@@ -1,62 +1,59 @@
-import { app } from 'electron'
-import fs from 'fs'
-import path from 'path'
-import { StoreManagerObj } from '../background'
-import file from '../configs/file'
-import { devLog, errorLog } from '../helpers/console'
-import { isProduction } from '../helpers/env'
-import { isValidImageExt, isValidShortcutExt } from '../helpers/file'
-import { mkdirIfNotExists } from '../helpers/folder'
-class FileManager {
-  constructor() {
-    this.folder = {}
-    this.folder.root = path.join(app.getPath('documents'), file.root)
-    this.folder.shortcuts = path.join(this.folder.root, file.shortcuts)
-    this.folder.images = path.join(this.folder.root, file.images)
-    this.folder.userdata = path.join(this.folder.root, file.userData)
-  }
+import { app } from 'electron';
+import fs from 'fs/promises';
+import path from 'path';
+import file from '../configs/file.json';
+import { errorDevLog } from '../helpers/console';
+import { isProduction } from '../helpers/env';
+import { isValidImageExt, isValidShortcutExt } from '../helpers/file';
+import { mkdirIfNotExists } from '../helpers/folder';
 
-  createRequiredFolders = () => {
-    const folders = Object.values(this.folder)
-    for (let folder of folders) {
-      mkdirIfNotExists(folder).catch((error) => {
-        if (isProduction()) {
-          // TODO warn the user about error and exit the program
-        } else {
-          devLog(error)
-        }
-      })
+const root = path.join(app.getPath('documents'), file.root);
+const appFolders = {
+  root,
+  shortcuts: path.join(root, file.shortcuts),
+  images: path.join(root, file.images),
+  userdata: path.join(root, file.userData),
+};
+
+export const createRequiredFolders = async () => {
+  const folders = Object.values(appFolders);
+  for (const folder of folders) {
+    try {
+      mkdirIfNotExists(folder);
+    } catch (err) {
+      if (isProduction()) {
+        // TODO warn the user about error and exit the program
+        return;
+      }
+      errorDevLog(err);
     }
   }
+};
 
-  getPathOf = (key) => {
-    return this.folder[key]
-  }
+export const getPathOf = (key) => appFolders[key];
 
-  moveToOurDocument = (filePath) => {
-    const fileName = path.basename(filePath)
-    const ext = path.parse(filePath).ext // .html
-    if (isValidImageExt(ext)) {
-      fs.rename(filePath, path.join(this.folder.images, fileName), (err) => {
-        if (err) {
-          errorLog(err)
-        } else {
-          StoreManagerObj.deleteProgramListCache()
-        }
-      })
-    } else if (isValidShortcutExt(ext)) {
-      fs.rename(filePath, path.join(this.folder.shortcuts, fileName), (err) => {
-        if (err) {
-          errorLog(err)
-        } else {
-          StoreManagerObj.deleteProgramListCache()
-        }
-      })
-    } else {
-      // dont move the file if the file is not shortcut nor image
-      errorLog('invalid extension')
+export const moveToOurDocument = async (filePath, storeManager) => {
+  const fileName = path.basename(filePath);
+  const { ext } = path.parse(filePath);
+  if (isValidImageExt(ext)) {
+    try {
+      await fs.rename(filePath, path.join(appFolders.images, fileName));
+    } catch (err) {
+      return errorDevLog(err);
     }
-  }
-}
 
-export default new FileManager()
+    return storeManager.deleteProgramListCache();
+  }
+
+  if (isValidShortcutExt(ext)) {
+    try {
+      await fs.rename(filePath, path.join(appFolders.shortcuts, fileName));
+    } catch (err) {
+      return errorDevLog(err);
+    }
+
+    return storeManager.deleteProgramListCache();
+  }
+
+  return errorDevLog('invalid extension');
+};

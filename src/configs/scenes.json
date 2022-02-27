@@ -9,7 +9,7 @@
   "expanded": {
     "transparent": true,
     "alwaysOnTop": true,
-    "devTools": true,
+    "devTools": false,
     "show": false,
     "fullscreen": true
   },
@@ -29,6 +29,7 @@
     "titleBarStyle": "hidden",
     "modal": true,
     "title": "Settings",
+    "devTools": true,
     "skipTaskbar": false
   },
   "welcomeScreen": {

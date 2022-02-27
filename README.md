@@ -1,1 +1,3 @@
-This is my hobby project that you can launch your program in this launcher
+# Compact Launcher
+
+Run your applications from this tiny little rocket!

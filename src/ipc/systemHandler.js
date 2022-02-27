@@ -1,101 +1,77 @@
-import { ipcMain } from 'electron'
-import { ForegroundProgramTrackerObj, PreferenceManagerObj, programImageManager, StoreManagerObj } from '../background'
-import { cacheProgramHTML } from '../strings/store'
-import { devLog } from '../helpers/console'
-import { removeFile } from '../helpers/file'
-import * as ipc from '../strings/ipc'
-import FileManager from '../system/FileManager'
-import Program from '../system/Program'
-import Steam from '../system/Steam'
-import { setAutoLaunch } from '../system/System'
-import Timer from '../system/Timer'
-import { toURL } from '../helpers/url'
+import { ipcMain } from 'electron';
+import { devLog } from '../helpers/console';
+import { removeFile } from '../helpers/file';
+import { toURL } from '../helpers/url';
+import * as ipc from '../strings/ipc';
+import { cacheProgramHTML } from '../strings/store';
+import { moveToOurDocument } from '../system/FileManager';
+import { addNewImage } from '../system/Program';
+import { setAutoLaunch, cancelShutDown } from '../system/System';
+import { preferenceManager, programImageManager, storeManager, userManager, foregroundProgramTracker, timer } from '../ioc';
 
-ipcMain.on(ipc.systemLog, (err, value) => {
-  devLog(value)
-})
+ipcMain.on(ipc.systemLog, (err, value) => devLog(value));
+ipcMain.handle(ipc.fetchImageFromServer, async (err, payload) => programImageManager.fetchImage(toURL(payload.programName)));
+ipcMain.on(ipc.addImageFromProgram, (err, items) => addNewImage({ source: items.file, name: items.name }));
+ipcMain.on(ipc.getUserAnswer, (err, response) => userManager.setSteamUser(response));
+ipcMain.on(ipc.disableShutdown, () => cancelShutDown());
+ipcMain.on(ipc.timerStarted, (err, data) => timer.startTimer(data.time, data.action));
+ipcMain.on(ipc.timerStopped, () => timer.clearTime());
+ipcMain.on(ipc.setAutoLaunch, (err, enabled) => setAutoLaunch(enabled));
+ipcMain.on(ipc.setSetting, (err, payload) => preferenceManager.set(payload.key, payload.value));
 
-ipcMain.on(ipc.removeProgram, (err, path) => {
-  removeFile(path).then((deleted) => {
+ipcMain.on(ipc.removeProgram, async (err, path) => {
+  try {
+    const deleted = await removeFile(path);
     if (deleted) {
-      StoreManagerObj.delete(cacheProgramHTML)
+      storeManager.delete(cacheProgramHTML);
     }
-  })
-})
+  } catch (delErr) {
+    devLog(delErr);
+  }
+});
 
-ipcMain.on(ipc.removeImageFromProgram, (err, imagePath) => {
-  removeFile(imagePath).then((deleted) => {
+ipcMain.on(ipc.removeImageFromProgram, async (err, imagePath) => {
+  try {
+    const deleted = await removeFile(imagePath);
     if (deleted) {
-      StoreManagerObj.delete(cacheProgramHTML)
+      storeManager.delete(cacheProgramHTML);
     }
-  })
-})
-
-ipcMain.on(ipc.addImageFromProgram, (err, items) => {
-  Program.addNewImage(items.file, items.name)
-})
-
-ipcMain.on(ipc.getUserAnswer, (err, response) => {
-  Steam.setUser(response)
-})
-
-ipcMain.on(ipc.disableShutdown, () => {
-  cancelShutDown()
-})
-
-ipcMain.on(ipc.timerStarted, (err, data) => {
-  Timer.startTimer(data.time, data.action)
-})
+  } catch (delErr) {
+    devLog(delErr);
+  }
+});
 
 ipcMain.on(ipc.timerSetTime, (err, data) => {
-  Timer.clearTime()
-  Timer.startTimer(data.timeLeft, data.action)
-})
-
-ipcMain.on(ipc.timerStopped, () => {
-  Timer.clearTime()
-})
-
-ipcMain.on(ipc.setAutoLaunch, (err, enabled) => {
-  setAutoLaunch(enabled)
-})
-
-ipcMain.on(ipc.setSetting, (err, payload) => {
-  PreferenceManagerObj.set(payload.key, payload.value)
-})
+  timer.clearTime();
+  timer.startTimer(data.timeLeft, data.action);
+});
 
 ipcMain.on(ipc.setAlwaysOnTop, (err, enabled) => {
   if (enabled) {
-    ForegroundProgramTrackerObj.start()
-  } else {
-    ForegroundProgramTrackerObj.stop()
+    return foregroundProgramTracker.start();
   }
-})
+  return foregroundProgramTracker.stop();
+});
 
 ipcMain.on(ipc.moveFile, (err, files) => {
-  for (let file of files) {
-    FileManager.moveToOurDocument(file)
+  for (const file of files) {
+    moveToOurDocument(file, storeManager);
   }
-})
-
-ipcMain.handle(ipc.fetchImageFromServer, async (err, payload) => {
-  return await programImageManager.fetchImage(toURL(payload.programName))
-})
+});
 
 ipcMain.handle(ipc.selectImageServer, async (err, payload) => {
-  const response = await programImageManager.selectProgram(payload.docId, payload.programName)
+  const response = await programImageManager.selectProgram(payload.docId, payload.programName);
   if (response.statusCode === 200) {
-    return response.filePath
+    return response.filePath;
   }
-  return null
-})
+  return null;
+});
 
 ipcMain.on(ipc.disconnectUser, (err, data) => {
   switch (data.platform) {
     case 'steam':
-      Steam.disconnectUser()
-      break
+      return userManager.disconnectSteamUser();
     default:
-      throw new Error('Invalid Platform')
+      throw new Error('Invalid Platform');
   }
-})
+});
