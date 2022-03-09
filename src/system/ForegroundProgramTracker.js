@@ -78,9 +78,6 @@ export default class ForegroundProgramTracker {
     }
   };
 
-  /**
-   * @param force - force the behaviour for always on top property
-   */
   setAlwaysOnTop = (force) => {
     WindowHandler.getAllWindows().forEach((window) => {
       window.setAlwaysOnTop(force ?? this.blackList.indexOf(this.activeProgram) === -1, 'screen'); // apply this rule for all windows.

@@ -1,8 +1,9 @@
 import { ipcMain } from 'electron';
-import { preferenceManager, programHandler, storeManager, windowHandler, userManager, timer } from '../ioc';
-import WindowHandler from '../system/WindowHandler';
+import { ICO_PATH } from '../helpers/constants';
+import { preferenceManager, programHandler, storeManager, timer, userManager, windowHandler } from '../ioc';
 import * as ipc from '../strings/ipc';
 import ListUI from '../system/ListUI';
+import WindowHandler from '../system/WindowHandler';
 
 ipcMain.on(ipc.openExpandWindow, () => windowHandler.openExpandedWindow());
 ipcMain.on(ipc.closeExpandWindow, () => windowHandler.openCollapsedWindow());
@@ -53,5 +54,6 @@ ipcMain.on(ipc.launchProgram, (err, file) => {
 
 timer.on('osTimer-notify', () => {
   const notification = timer.getNotification();
+  notification.icon = ICO_PATH;
   WindowHandler.getCurrentWindow().webContents.send(ipc.notificationReceived, notification);
 });

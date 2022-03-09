@@ -1,5 +1,5 @@
 import { app } from 'electron';
-import { version } from '../package.json';
+import { version, productName } from '../package.json';
 import { errorDevLog } from './helpers/console';
 import { isLinux, isWindows } from './helpers/os';
 import './ipc/systemHandler';
@@ -12,6 +12,10 @@ import { windowHandler, userManager, trayManager, preferenceManager, foregroundP
 if (isLinux() || isWindows()) {
   app.commandLine.appendSwitch('enable-transparent-visuals'); // fix the tranparent issue
   app.commandLine.appendSwitch('disable-gpu'); // fix the tranparent issue
+}
+
+if (isWindows()) {
+  app.setAppUserModelId(productName);
 }
 
 app.disableHardwareAcceleration();
