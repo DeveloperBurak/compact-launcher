@@ -5,9 +5,6 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/font-awesome/css/fontawesome.min.css" />
     <link rel="stylesheet" href="../assets/font-awesome/css/all.min.css" />
-    <link rel="stylesheet" href="../assets/jquery-contextmenu/jquery.contextMenu.min.css" />
-    <link rel="stylesheet" href="../assets/jquery-ui/themes/base/core.css" />
-    <link rel="stylesheet" href="../assets/jquery-ui/themes/base/theme.css" />
     <link rel="stylesheet" href="../assets/css/main.css" />
   </head>
   <body>
@@ -15,16 +12,26 @@
       <div class="introduction col-lg-12">
         <div step="1">
           <h2>Welcome To Compact Launcher</h2>
-          <p>You can easily launch your program. And it is so minimized!</p>
-        </div>
-        <div step="2">
           <p>
-            You can change your preferences. <button type="button" class="btn btn-link" id="btn-options">Click Here</button> to set your preferences
-            before application starts. You can change them any time.
+            You can easily launch your programs in this little rocket! <i class="fas fa-rocket" id="rocket"></i>
+            <br>
+            <br>
+            This program aims to provide all your shortcuts in that rocket, when you click or hover on this, you can see all apps that you imported
           </p>
         </div>
+        <div step="2">
+          <h3>How App Works</h2>
+          <p>
+            Compact Launcher folder is added in your Documents. When you move your shortcuts to shortcuts folder,
+            this shortuct appears in list when you expand the screen through rocket. Also if you want to preview image for this shortcut, 
+            you can move your image to images folder same name with shortcut</p>
+        </div>
         <div step="3">
-          <p>In this app, there is some <button type="button" class="btn btn-link" id="btn-tools">Tools</button> that helps you.</p>
+          <h3>Preferences</h2>
+          <p>
+            There is some preferences for you. You can determine that how the app would act.<button type="button" class="btn btn-link" id="btn-options">Click Here</button> to set your preferences
+            before application starts. You can change them any time.
+          </p>
         </div>
         <div step="4">
           <p>You are ready to go!</p>
@@ -33,10 +40,12 @@
       <div class="col-lg-12 take-action">
         <button class="btn next-step float-right" step="1">Get Started</button>
         <button class="btn next-step" step="2">Preferences</button>
-        <button class="btn next-step" step="3">Tools</button>
+        <button class="btn next-step" step="3">How Works</button>
         <button class="btn next-step finish" id="btn-finish" step="4">Finish</button>
       </div>
     </div>
+    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../../app.js"></script>
     <script src="../welcome.js"></script>
   </body>
 </html>

@@ -24,7 +24,7 @@ app.on('ready', async () => {
   await createRequiredFolders();
 
   try {
-    preferenceManager.init();
+    await preferenceManager.init();
     foregroundProgramTracker.init();
   } catch (err) {
     errorDevLog(err);

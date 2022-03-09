@@ -1,5 +1,5 @@
-import { ipcRenderer } from 'electron';
-import $ from 'jquery';
+/* global $, window */
+
 import { closeSettingWindow, openCollapsedWindow, openSettingWindow, openToolsWindow, closeToolsWindow } from '../strings/ipc';
 
 const stepTextButton = (element, getBackup) => {
@@ -37,10 +37,10 @@ $('.next-step').on('click', (e) => {
   const nextStepButton = $(`.next-step[step="${targetStep}"]`);
   const previousStepButton = $(`.next-step[step="${targetStep - 1}"]`);
   // close the other windows when page change
-  ipcRenderer.send(closeSettingWindow);
-  ipcRenderer.send(closeToolsWindow);
+  window.api.send(closeSettingWindow);
+  window.api.send(closeToolsWindow);
   if (nextStepEls.length === 0) {
-    ipcRenderer.send(openCollapsedWindow, true);
+    window.api.send(openCollapsedWindow, true);
   } else {
     $(`${elRefs}[step!="${targetStep}"]`).hide();
     $('.next-step').hide();
@@ -57,16 +57,16 @@ $('.next-step').on('click', (e) => {
       // button re-styling
       $('.take-action').css('justify-content', 'flex-end');
     } else {
-      $('.take-action').css('justify-content', 'space-around');
+      $('.take-action').css('justify-content', 'space-between');
     }
   }
 });
 $('#btn-options').on('click', () => {
-  ipcRenderer.send(openSettingWindow);
+  window.api.send(openSettingWindow);
 });
 $('#btn-tools').on('click', () => {
-  ipcRenderer.send(openToolsWindow);
+  window.api.send(openToolsWindow);
 });
 $('#btn-finish').on('click', () => {
-  ipcRenderer.send(openCollapsedWindow, true);
+  window.api.send(openCollapsedWindow, true);
 });
