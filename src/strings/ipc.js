@@ -47,3 +47,5 @@ export const selectImageServer = 'server:program:select';
 export const themeInfo = 'theme:info';
 
 export const moveFile = 'file:move';
+
+export const openDialog = 'open:dialog';

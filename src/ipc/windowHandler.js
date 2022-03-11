@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, dialog } from 'electron';
 import { ICO_PATH } from '../helpers/constants';
 import { preferenceManager, programHandler, storeManager, timer, userManager, windowHandler } from '../ioc';
 import * as ipc from '../strings/ipc';
@@ -57,3 +57,5 @@ timer.on('osTimer-notify', () => {
   notification.icon = ICO_PATH;
   WindowHandler.getCurrentWindow().webContents.send(ipc.notificationReceived, notification);
 });
+
+ipcMain.handle(ipc.openDialog, ({ options }) => dialog.showOpenDialog(WindowHandler.getCurrentWindow(), options));

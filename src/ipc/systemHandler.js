@@ -11,7 +11,7 @@ import { preferenceManager, programImageManager, storeManager, userManager, fore
 
 ipcMain.on(ipc.systemLog, (err, value) => devLog(value));
 ipcMain.handle(ipc.fetchImageFromServer, async (err, payload) => programImageManager.fetchImage(toURL(payload.programName)));
-ipcMain.on(ipc.addImageFromProgram, (err, items) => addNewImage({ source: items.file, name: items.name }));
+ipcMain.on(ipc.addImageFromProgram, (err, items) => addNewImage({ source: items.file.filePaths[0], name: items.name }));
 ipcMain.on(ipc.getUserAnswer, (err, response) => userManager.setSteamUser(response));
 ipcMain.on(ipc.disableShutdown, () => cancelShutDown());
 ipcMain.on(ipc.timerStarted, (err, data) => timer.startTimer(data.time, data.action));

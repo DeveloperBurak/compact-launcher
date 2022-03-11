@@ -1,6 +1,7 @@
-import { contextBridge, ipcRenderer, remote } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 // eslint-disable-next-line import/no-unresolved
 import env from 'env';
+import { openDialog } from '../strings/ipc';
 
 contextBridge.exposeInMainWorld('api', {
   send: (channel, data) => {
@@ -19,9 +20,7 @@ contextBridge.exposeInMainWorld('api', {
 });
 
 contextBridge.exposeInMainWorld('remote', {
-  openDialog: (options, func) => {
-    remote.dialog.showOpenDialog(remote.getCurrentWindow(), options, func);
-  },
+  openDialog: async (options) => ipcRenderer.invoke(openDialog, { options }),
 });
 
 contextBridge.exposeInMainWorld('env', env);

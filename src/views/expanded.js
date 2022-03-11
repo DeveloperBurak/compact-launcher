@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 /* global $, window, alertify */
 import { APP_NAME } from '../configs/app.json';
+import { errorDevLog } from '../helpers/console';
 import { isDev } from '../helpers/env';
 import * as ipc from '../strings/ipc';
 import './app';
@@ -12,6 +13,7 @@ const programListCover = $('#program-list');
 const authButtons = $('.btn-auth-program');
 
 let closingTimeOut = null;
+let closeLock = false;
 
 const fetchImagesFromServer = (programName) => {
   window.api.invoke(ipc.fetchImageFromServer, { programName }).then((result) => {
@@ -91,13 +93,16 @@ $(() => {
   $('.btn-refresh-programs').on('click', () => renderList({ refreshCache: true }));
   $('#btn-openSettingsWindow').on('click', () => window.api.send(ipc.openSettingWindow));
   $('#btn-openToolsWindow').on('click', () => window.api.send(ipc.openToolsWindow));
-  $('#program-preview').on('error', () => $(this).hide());
-  $('#program-preview').on('load', () => $(this).show());
+  $('#program-preview').on('error', (e) => $(e.currentTarget).hide());
+  $('#program-preview').on('load', (e) => $(e.currentTarget).show());
   programPreviewContainer.on('webkitAnimationEnd animationend', () => programPreviewContainer.removeClass('appearing'));
 
   programListCover.on('mouseleave', () => {
     closingTimeOut = setTimeout(
       () => {
+        if (closeLock) {
+          return;
+        }
         if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
           programListCover.animate(
             {
@@ -233,15 +238,24 @@ $(() => {
               local: {
                 name: 'From PC',
                 callback: (key, opt) => {
-                  window.remote.openDialog({ properties: ['openFile'] }, (file) => {
-                    if (file !== undefined) {
-                      const button = $(opt.$trigger).children('.btn.program');
-                      window.api.send(ipc.addImageFromProgram, {
-                        file: file[0],
-                        name: button.attr('programName'),
-                      });
-                    }
-                  });
+                  closeLock = true;
+                  window.remote
+                    .openDialog({ properties: ['openFile'] })
+                    .then((file) => {
+                      window.api.send(ipc.systemLog, file);
+                      if (file !== undefined) {
+                        const button = $(opt.$trigger).children('.btn.program');
+                        window.api.send(ipc.addImageFromProgram, {
+                          file,
+                          name: button.attr('programName'),
+                        });
+                        closeLock = false;
+                      }
+                    })
+                    .catch((err) => {
+                      errorDevLog(err);
+                      closeLock = false;
+                    });
                 },
               },
             },

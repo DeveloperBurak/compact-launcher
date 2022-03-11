@@ -15,6 +15,7 @@ if (isLinux() || isWindows()) {
 }
 
 if (isWindows()) {
+  // notification signing
   app.setAppUserModelId(productName);
 }
 

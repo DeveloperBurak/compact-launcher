@@ -9,7 +9,7 @@
   "expanded": {
     "transparent": true,
     "alwaysOnTop": true,
-    "devTools": false,
+    "devTools": true,
     "show": false,
     "fullscreen": true
   },
