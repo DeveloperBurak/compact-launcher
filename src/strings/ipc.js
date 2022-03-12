@@ -5,7 +5,6 @@ export const renderItem = 'items:render';
 
 export const getSteamUser = 'steam:user:get';
 export const isSteamUserExists = 'steam:user:exists';
-export const isSteamExists = 'steam:check:exists';
 export const getUserAnswer = 'stem:user:answer';
 export const disconnectUser = 'user:disconnect';
 

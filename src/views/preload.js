@@ -16,7 +16,7 @@ contextBridge.exposeInMainWorld('api', {
       return func(event, ...args);
     });
   },
-  invoke: (channel, data) => ipcRenderer.invoke(channel, data),
+  invoke: async (channel, data) => ipcRenderer.invoke(channel, data),
 });
 
 contextBridge.exposeInMainWorld('remote', {

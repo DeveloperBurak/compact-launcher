@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import Winreg from 'winreg';
 import { errorDevLog } from '../helpers/console';
-import { fileExists, readVdf } from '../helpers/file';
+import { getRegistryItems } from '../helpers/winReg';
+import { fileExists, readVdf, writeFile } from '../helpers/file';
 import { isWindows } from '../helpers/os';
 import { getPathOf } from './FileManager';
 
@@ -19,22 +20,17 @@ export default class Steam {
 
   getInstalledPath = async () => {
     if (isWindows()) {
-      const regKey = new Winreg({
+      const registryItems = await getRegistryItems({
         hive: Winreg.HKCU,
         key: this.STEAM_REG_PATH,
       });
 
-      regKey.values(async (err, items) => {
-        if (err) {
-          throw err;
+      for (const item of registryItems) {
+        if (item.name === 'SteamPath') {
+          return item.value;
         }
-        for (let i = 0; i < items.length; i++) {
-          if (items[i].name === 'SteamPath') {
-            return items[i].value;
-          }
-        }
-        return null;
-      });
+      }
+      return null;
     }
     // TODO linux and macos compability
     return null;
@@ -45,7 +41,7 @@ export default class Steam {
     if (user === null) {
       if (fileExists(this.steamUserFile)) {
         try {
-          const data = await fs.promises.readFile(this.steamUserFile);
+          const data = await fs.readFile(this.steamUserFile);
           return JSON.parse(data.toString('utf8'));
         } catch (e) {
           fs.unlink(this.steamUserFile);
@@ -62,15 +58,23 @@ export default class Steam {
     let userObject;
     if (answer) {
       const installedPath = await this.getInstalledPath();
-      const steamVdf = await readVdf(installedPath + this.steamLoginUsersVdf);
+      const steamVdf = await readVdf(`${installedPath}${this.steamLoginUsersVdf}`);
       const { users } = steamVdf;
       let selectedUser = null;
-      for (const user of users) {
+
+      for (const userId of Object.keys(users)) {
+        if (selectedUser !== null) {
+          break;
+        }
+
+        const user = users[userId];
         const keys = Object.keys(user);
+
         for (const key of keys) {
           if (key.toLowerCase() === 'mostrecent' && user[key] === 1) {
             selectedUser = user;
-            selectedUser.id = user;
+            selectedUser.id = userId;
+            break;
           }
         }
       }
@@ -92,16 +96,18 @@ export default class Steam {
         account: false,
       };
     }
-    fs.writeFileSync(this.steamUserFile, JSON.stringify(userObject));
+    writeFile(this.steamUserFile, JSON.stringify(userObject));
   };
 
   disconnectUser = async () => {
     this.storeManager.delete(this.storeName);
     const exists = await fileExists(this.steamUserFile);
     if (exists) {
-      fs.unlink(this.steamUserFile, (err) => {
+      try {
+        fs.unlink(this.steamUserFile);
+      } catch (err) {
         if (err != null) errorDevLog(err);
-      });
+      }
     }
   };
 

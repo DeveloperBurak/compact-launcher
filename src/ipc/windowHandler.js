@@ -30,10 +30,7 @@ ipcMain.on(ipc.closeToolsWindow, () => {
   if (windowHandler.toolsWindow !== null) windowHandler.toolsWindow.close();
 });
 
-ipcMain.on(ipc.isSteamExists, async () => {
-  const steamPath = await userManager.getSteamUser();
-  windowHandler.expandedWindow.webContents.send(ipc.isSteamUserExists, steamPath !== null);
-});
+ipcMain.handle(ipc.isSteamUserExists, async () => userManager.getSteamUser());
 
 ipcMain.handle(ipc.getProgramsHTML, async (event, payload = {}) => {
   let html;

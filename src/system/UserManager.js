@@ -26,5 +26,5 @@ export default class UserManager {
 
   disconnectSteamUser = () => this.steamDriver.disconnectUser();
 
-  getSteamUser = async () => this.steamDriver.getInstalledPath();
+  getSteamUser = () => this.steamDriver.getInstalledPath();
 }

@@ -12,6 +12,8 @@ const programContainer = $('#program-container');
 const programListCover = $('#program-list');
 const authButtons = $('.btn-auth-program');
 
+alertify.defaults.glossary.title = APP_NAME;
+
 let closingTimeOut = null;
 let closeLock = false;
 
@@ -57,7 +59,9 @@ window.api.receive(ipc.getSteamUser, (e, user) => {
   button.attr('disabled', true);
 });
 
-window.api.receive(ipc.isSteamUserExists, (e, exists) => {
+const askSteamBind = async () => {
+  const exists = await window.api.invoke(ipc.isSteamUserExists);
+
   if (exists) {
     alertify
       .confirm(
@@ -65,10 +69,9 @@ window.api.receive(ipc.isSteamUserExists, (e, exists) => {
         'Steam Found. Do you want to add recent user?',
         () => {
           window.api.send(ipc.getUserAnswer, true);
+          window.api.send(ipc.closeExpandWindow);
         },
-        () => {
-          window.api.send(ipc.getUserAnswer, false);
-        },
+        () => window.api.send(ipc.getUserAnswer, false),
       )
       .set({
         labels: {
@@ -76,8 +79,10 @@ window.api.receive(ipc.isSteamUserExists, (e, exists) => {
           cancel: 'No',
         },
       });
+  } else {
+    alertify.alert('Steam Not Found.');
   }
-});
+};
 
 $(() => {
   // init
@@ -89,7 +94,7 @@ $(() => {
 
   // User behavours
   programListCover.on('mouseenter', () => clearTimeout(closingTimeOut));
-  $('.auth-steam').on('click', () => window.api.send(ipc.isSteamExists));
+  $('.auth-steam').on('click', () => askSteamBind());
   $('.btn-refresh-programs').on('click', () => renderList({ refreshCache: true }));
   $('#btn-openSettingsWindow').on('click', () => window.api.send(ipc.openSettingWindow));
   $('#btn-openToolsWindow').on('click', () => window.api.send(ipc.openToolsWindow));
@@ -109,9 +114,7 @@ $(() => {
               'margin-left': `-${expandedScene.width()}px`,
             },
             1000,
-            () => {
-              window.api.send(ipc.closeExpandWindow);
-            },
+            () => window.api.send(ipc.closeExpandWindow),
           );
         }
       },
@@ -120,9 +123,9 @@ $(() => {
   });
 
   $('.btn-disconnect-user').on('click', (e) => {
-    const button = e.currentTarget;
-    const platform = $(button).parent().attr('platform');
+    const platform = $(e.currentTarget).parent().attr('platform');
     window.api.send(ipc.disconnectUser, { platform });
+    window.api.send(ipc.closeExpandWindow);
   });
 
   body.on('click', '.btn-server-image', (e) => {
@@ -192,15 +195,19 @@ $(() => {
 
   $('.btn-user').on('click', () => {
     $('.modal.user').show();
+    closeLock = true;
     authButtons.each((index, authButton) => {
-      $(authButton).find('path').attr('fill', $(authButton).find('path').attr('secondary'));
       if ($(authButton).attr('authorized') === 'true' || $(authButton).attr('authorized') === true) {
+        $(authButton).find('path').attr('fill', $(authButton).find('path').attr('secondary'));
         $(authButton).children('.btn-disconnect-user').show();
+      } else {
+        $(authButton).find('path').attr('fill', $(authButton).find('path').attr('primary'));
       }
     });
   });
 
   $('.modal .close').on('click', (e) => {
+    closeLock = false;
     const button = $(e.currentTarget);
     button.closest('.modal').hide();
   });
@@ -218,6 +225,7 @@ $(() => {
       button.find('path').attr('fill', button.find('path').attr('primary'));
     }
   });
+
   $.contextMenu({
     selector: '.program-cover',
     items: {
