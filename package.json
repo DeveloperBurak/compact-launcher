@@ -64,7 +64,7 @@
     "babel-loader": "^8.0.0-beta.4",
     "babel-preset-latest-node": "^5.5.1",
     "css-loader": "^3.4.0",
-    "electron": "^17.1.0",
+    "electron": "^17.2.0",
     "electron-builder": "^22.10.5",
     "electron-installer-snap": "^5.1.0",
     "electron-rebuild": "^3.2.7",
