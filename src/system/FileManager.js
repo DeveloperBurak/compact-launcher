@@ -57,3 +57,12 @@ export const moveToOurDocument = async (filePath, storeManager) => {
 
   return errorDevLog('invalid extension');
 };
+
+export const renameProgram = async ({ oldName, newName, oldPath }) => {
+  const newPath = oldPath.replace(oldName, newName);
+  try {
+    await fs.rename(oldPath, newPath);
+  } catch (err) {
+    throw new Error('Failed during renaming');
+  }
+};

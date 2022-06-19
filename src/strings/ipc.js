@@ -12,6 +12,7 @@ export const launchProgram = 'program:launch';
 export const removeProgram = 'program:remove';
 export const removeImageFromProgram = 'program:remove:image';
 export const addImageFromProgram = 'program:add:image';
+export const renameProgram = 'program:rename';
 
 export const openCollapsedWindow = 'window:open:collapsed';
 export const openExpandWindow = 'window:open:expand';

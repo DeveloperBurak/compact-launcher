@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-/* global $, window, alertify */
+/* global $, window, alertify, Swal */
 import { APP_NAME } from '../configs/app.json';
 import { errorDevLog } from '../helpers/console';
 import { isDev } from '../helpers/env';
@@ -17,13 +17,36 @@ alertify.defaults.glossary.title = APP_NAME;
 let closingTimeOut = null;
 let closeLock = false;
 
+const startCloseTimer = () => {
+  closingTimeOut = setTimeout(
+    () => {
+      if (closeLock) {
+        return;
+      }
+      if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
+        programListCover.animate(
+          {
+            'margin-left': `-${expandedScene.width()}px`,
+          },
+          1000,
+          () => window.api.send(ipc.closeExpandWindow),
+        );
+      }
+    },
+    isDev() ? 2000 : 350,
+  );
+};
+
+const stopCloseTimer = () => {
+  clearTimeout(closingTimeOut); // if user gets there by accidently, don't expand the screen immediatly
+  closingTimeOut = null;
+};
+
 const fetchImagesFromServer = (programName) => {
   window.api.invoke(ipc.fetchImageFromServer, { programName }).then((result) => {
     const { images } = result.data.program;
 
-    // TODO catch the what time left and continue to the timeout after model is closed
-    clearTimeout(closingTimeOut); // if user gets there by accidently, don't expand the screen immediatly
-    closingTimeOut = null;
+    stopCloseTimer();
 
     if (images.length > 0) {
       $('#server-image-selector').removeClass('d-none');
@@ -103,23 +126,7 @@ $(() => {
   programPreviewContainer.on('webkitAnimationEnd animationend', () => programPreviewContainer.removeClass('appearing'));
 
   programListCover.on('mouseleave', () => {
-    closingTimeOut = setTimeout(
-      () => {
-        if (closeLock) {
-          return;
-        }
-        if ($('.modal').is(':hidden') && $('.context-menu-list').css('display') === 'none') {
-          programListCover.animate(
-            {
-              'margin-left': `-${expandedScene.width()}px`,
-            },
-            1000,
-            () => window.api.send(ipc.closeExpandWindow),
-          );
-        }
-      },
-      isDev() ? 2000 : 350,
-    );
+    startCloseTimer();
   });
 
   $('.btn-disconnect-user').on('click', (e) => {
@@ -229,6 +236,39 @@ $(() => {
   $.contextMenu({
     selector: '.program-cover',
     items: {
+      programName: {
+        name: 'Change Name',
+        callback: (key, opt) => {
+          const button = $(opt.$trigger).children('.btn.program');
+          const programName = button.attr('programname');
+          stopCloseTimer();
+          Swal.fire({
+            title: 'Change Name',
+            input: 'text',
+            text: programName,
+          }).then(async (result) => {
+            startCloseTimer();
+            if (result.isConfirmed) {
+              window.api
+                .invoke(ipc.renameProgram, {
+                  oldName: programName,
+                  newName: result.value,
+                  oldPath: button.attr('execute'),
+                })
+                .then(() => renderList({ refreshCache: true }))
+                .catch((error) => {
+                  stopCloseTimer();
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    // TODO make better message, it adds some text when catch invoked error
+                    text: error.message,
+                  }).then(() => startCloseTimer());
+                });
+            }
+          });
+        },
+      },
       image: {
         name: 'Image',
         items: {

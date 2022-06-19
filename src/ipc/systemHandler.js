@@ -4,7 +4,7 @@ import { removeFile } from '../helpers/file';
 import { toURL } from '../helpers/url';
 import * as ipc from '../strings/ipc';
 import { cacheProgramHTML } from '../strings/store';
-import { moveToOurDocument } from '../system/FileManager';
+import { moveToOurDocument, renameProgram } from '../system/FileManager';
 import { addNewImage } from '../system/Program';
 import { setAutoLaunch, cancelShutDown } from '../system/System';
 import { preferenceManager, programImageManager, storeManager, userManager, foregroundProgramTracker, timer } from '../ioc';
@@ -18,6 +18,7 @@ ipcMain.on(ipc.timerStarted, (err, data) => timer.startTimer(data.time, data.act
 ipcMain.on(ipc.timerStopped, () => timer.clearTime());
 ipcMain.on(ipc.setAutoLaunch, (err, enabled) => setAutoLaunch(enabled));
 ipcMain.on(ipc.setSetting, (err, payload) => preferenceManager.set(payload.key, payload.value));
+ipcMain.handle(ipc.renameProgram, async (err, payload) => renameProgram(payload));
 
 ipcMain.on(ipc.removeProgram, async (err, path) => {
   try {
