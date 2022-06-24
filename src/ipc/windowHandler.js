@@ -1,5 +1,4 @@
-import { ipcMain, dialog } from 'electron';
-import { ICO_PATH } from '../helpers/constants';
+import { dialog, ipcMain } from 'electron';
 import { preferenceManager, programHandler, storeManager, timer, userManager, windowHandler } from '../ioc';
 import * as ipc from '../strings/ipc';
 import ListUI from '../system/ListUI';
@@ -47,12 +46,6 @@ ipcMain.handle(ipc.getProgramsHTML, async (event, payload = {}) => {
 ipcMain.on(ipc.launchProgram, (_err, file) => {
   programHandler.launch(file);
   windowHandler.expandedWindow.webContents.send(ipc.closeExpandWindow);
-});
-
-timer.on('osTimer-notify', () => {
-  const notification = timer.getNotification();
-  notification.icon = ICO_PATH;
-  WindowHandler.getCurrentWindow().webContents.send(ipc.notificationReceived, notification);
 });
 
 ipcMain.handle(ipc.openDialog, ({ options }) => dialog.showOpenDialog(WindowHandler.getCurrentWindow(), options));
