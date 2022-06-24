@@ -1,5 +1,4 @@
 import activeWin from 'active-win';
-import EE from 'events';
 import fs from 'fs/promises';
 import path from 'path';
 import { writeFile } from '../helpers/file';
@@ -8,13 +7,13 @@ import { getPathOf } from './FileManager';
 import WindowHandler from './WindowHandler';
 
 export default class ForegroundProgramTracker {
-  constructor() {
-    EE.call(this);
+  constructor({ eventEmitter }) {
     this.blackList = [];
     this.exludeForActivePrograms = ForegroundProgramTracker.excludeForActiveProgram();
     this.activeProgram = null;
     this.forbiddenProgramsFile = path.join(getPathOf('userdata'), 'forbidden-programs.json');
     this.trackingInterval = null;
+    this.eventEmitter = eventEmitter;
   }
 
   init = async () => {
@@ -52,7 +51,7 @@ export default class ForegroundProgramTracker {
       this.blackList.push(this.activeProgram);
       fs.writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList));
       this.setAlwaysOnTop();
-      this.emit('forceUpdateTrayMenu');
+      this.eventEmitter.emit('forceUpdateTrayMenu');
     }
   };
 
@@ -61,7 +60,7 @@ export default class ForegroundProgramTracker {
       this.blackList.splice(this.blackList.indexOf(this.activeProgram), 1);
       fs.writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList));
       this.setAlwaysOnTop();
-      this.emit('forceUpdateTrayMenu');
+      this.eventEmitter.emit('forceUpdateTrayMenu');
     }
   };
 
@@ -73,7 +72,7 @@ export default class ForegroundProgramTracker {
       this.activeProgram !== foregroundProgram.owner.name
     ) {
       this.activeProgram = foregroundProgram.owner.name;
-      this.emit('forceUpdateTrayMenu');
+      this.eventEmitter.emit('forceUpdateTrayMenu');
       this.setAlwaysOnTop();
     }
   };

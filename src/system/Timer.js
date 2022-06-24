@@ -1,14 +1,13 @@
-import EE from 'events';
 import { lockPC, shutdownPC, sleepPC } from './System';
 
 // OS Action(like sleep, shutdown etc.) Timer
 export default class Timer {
-  constructor() {
-    EE.call(this);
+  constructor({ eventEmitter }) {
     this.remainingTime = 0;
     this.timerInterval = null;
     this.action = null; // the action when time is up
     this.nearTimeTreshold = 3; // (in minute)
+    this.eventEmitter = eventEmitter;
   }
 
   /**
@@ -23,7 +22,7 @@ export default class Timer {
     let timeTresholdReached = false;
     this.remainingTime = time;
     this.action = action;
-    this.emit('osTimer-notify');
+    this.eventEmitter.emit('osTimer-notify', this.getNotification());
 
     if (time > 1) {
       if (this.timerInterval === null) {
@@ -32,7 +31,7 @@ export default class Timer {
           if (!timeTresholdReached) {
             if (this.remainingTime / 60 === this.nearTimeTreshold) {
               timeTresholdReached = true;
-              this.emit('osTimer-notify');
+              this.eventEmitter.emit('osTimer-notify', this.getNotification());
             }
           }
           if (this.remainingTime <= 0) {

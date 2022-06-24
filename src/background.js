@@ -7,7 +7,7 @@ import './ipc/windowHandler';
 import * as setting from './strings/settings';
 import { appVersion } from './strings/store';
 import { createRequiredFolders } from './system/FileManager';
-import { windowHandler, userManager, trayManager, preferenceManager, foregroundProgramTracker, storeManager } from './ioc';
+import { windowHandler, userManager, trayManager, preferenceManager, foregroundProgramTracker, storeManager, notificationHandler } from './ioc';
 
 if (isLinux() || isWindows()) {
   app.commandLine.appendSwitch('enable-transparent-visuals'); // fix the tranparent issue
@@ -27,6 +27,7 @@ app.on('ready', async () => {
   try {
     await preferenceManager.init();
     foregroundProgramTracker.init();
+    notificationHandler.init();
   } catch (err) {
     errorDevLog(err);
   }

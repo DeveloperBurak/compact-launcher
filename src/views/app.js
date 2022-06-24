@@ -19,10 +19,3 @@ window.api.receive(ipc.themeInfo, (_err, colors) => {
     el.style.color = colors.text;
   }
 });
-
-window.api.receive(ipc.notificationReceived, (_err, notification) => {
-  const myNotification = new window.Notification(notification.title, notification);
-  myNotification.onclick = () => {
-    window.api.send(ipc.openToolsWindow);
-  };
-});
