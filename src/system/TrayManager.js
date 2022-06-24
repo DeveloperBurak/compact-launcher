@@ -3,9 +3,10 @@ import { app, Menu, Tray } from 'electron';
 import { APP_NAME } from '../configs/app.json';
 
 export default class TrayManager {
-  constructor({ foregroundProgramTracker, windowHandler }) {
+  constructor({ foregroundProgramTracker, windowHandler, eventEmitter }) {
     this.foregroundProgramTracker = foregroundProgramTracker;
     this.windowHandler = windowHandler;
+    this.eventEmitter = eventEmitter;
   }
 
   generateMenu = () => {
@@ -61,7 +62,7 @@ export default class TrayManager {
       tray.popUpContextMenu();
     });
 
-    this.foregroundProgramTracker.on('forceUpdateTrayMenu', () => {
+    this.eventEmitter.on('forceUpdateTrayMenu', () => {
       tray.setContextMenu(Menu.buildFromTemplate(this.generateMenu()));
     });
     return tray;
