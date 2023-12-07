@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* global $, window, Swal */
-import { APP_NAME } from '../configs/app.json';
+import APP_CONFIG from '../configs/app';
 import { errorDevLog } from '../helpers/console';
 import { isDev } from '../helpers/env';
 import * as ipc from '../strings/ipc';
@@ -85,7 +85,7 @@ const askSteamBind = async () => {
 
   if (exists) {
     Swal.fire({
-      title: APP_NAME,
+      title: APP_CONFIG.APP_NAME,
       text: 'Steam Found. Do you want to add recent user?',
       showDenyButton: true,
       showCancelButton: true,

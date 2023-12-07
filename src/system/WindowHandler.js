@@ -1,6 +1,6 @@
 import { BrowserWindow, Menu, screen } from 'electron';
 import path from 'path';
-import scenes from '../configs/scenes.json';
+import SCENE_CONFIG from '../configs/scenes';
 import { devLog } from '../helpers/console';
 import { isDev } from '../helpers/env';
 import { isLinux, isWindows } from '../helpers/os';
@@ -23,7 +23,7 @@ export default class WindowHandler {
   openWelcomeWindow = () => {
     const displays = screen.getAllDisplays();
     const primaryDisplay = displays.find((display) => display.bounds.x === 0 || display.bounds.y === 0);
-    const welcomeWindow = this.createWindow('welcome', scenes.welcomeScreen);
+    const welcomeWindow = this.createWindow('welcome', SCENE_CONFIG.welcomeScreen);
     welcomeWindow.setBounds({
       x: primaryDisplay.bounds.x + primaryDisplay.size.width / 2 - welcomeWindow.getSize()[0] / 2,
       y: primaryDisplay.bounds.y + primaryDisplay.size.height / 2 - welcomeWindow.getSize()[1] / 2,
@@ -42,7 +42,7 @@ export default class WindowHandler {
 
   openCollapsedWindow = () => {
     if (this.collapsedWindow == null) {
-      const collapsedWindow = this.createWindow('collapsed', scenes.collapsed);
+      const collapsedWindow = this.createWindow('collapsed', SCENE_CONFIG.collapsed);
       collapsedWindow.loadURL(path.join(__dirname, 'views', 'collapsed.html'));
       collapsedWindow.on('ready-to-show', () => {
         collapsedWindow.show();
@@ -60,7 +60,7 @@ export default class WindowHandler {
 
   openExpandedWindow = () => {
     if (this.expandedWindow == null) {
-      const expandedWindow = this.createWindow('expanded', scenes.expanded);
+      const expandedWindow = this.createWindow('expanded', SCENE_CONFIG.expanded);
       expandedWindow.loadURL(path.join(__dirname, 'views/expanded.html'));
       expandedWindow.on('ready-to-show', async () => {
         let steamUser;
@@ -90,7 +90,7 @@ export default class WindowHandler {
 
   openSettingsWindow = () => {
     if (this.settingsWindow == null) {
-      const settingsWindow = this.createWindow('subSettings', scenes.settingsScreen);
+      const settingsWindow = this.createWindow('subSettings', SCENE_CONFIG.settingsScreen);
       settingsWindow.loadURL(path.join(__dirname, 'views/sub/settings.html'));
       settingsWindow.setMenu(null);
       settingsWindow
@@ -113,7 +113,7 @@ export default class WindowHandler {
 
   openToolsWindow = () => {
     if (this.toolsWindow === null) {
-      const toolsWindow = this.createWindow('subTools', scenes.toolsScreen);
+      const toolsWindow = this.createWindow('subTools', SCENE_CONFIG.toolsScreen);
       toolsWindow.loadURL(path.join(__dirname, 'views/sub/tools.html'));
       toolsWindow.setMenu(null);
       this.toolsWindow = toolsWindow;

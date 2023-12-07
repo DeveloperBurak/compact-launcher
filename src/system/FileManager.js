@@ -1,18 +1,18 @@
 import { app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
-import file from '../configs/file.json';
+import FILE_CONFIG from '../configs/file';
 import { errorDevLog } from '../helpers/console';
 import { isProduction } from '../helpers/env';
 import { isValidImageExt, isValidShortcutExt } from '../helpers/file';
 import { mkdirIfNotExists } from '../helpers/folder';
 
-const root = path.join(app.getPath('documents'), file.root);
+const root = path.join(app.getPath('documents'), FILE_CONFIG.root);
 const appFolders = {
   root,
-  shortcuts: path.join(root, file.shortcuts),
-  images: path.join(root, file.images),
-  userdata: path.join(root, file.userData),
+  shortcuts: path.join(root, FILE_CONFIG.shortcuts),
+  images: path.join(root, FILE_CONFIG.images),
+  userdata: path.join(root, FILE_CONFIG.userData),
 };
 
 export const createRequiredFolders = async () => {

@@ -1,6 +1,6 @@
 import Store from 'electron-store';
 import { version } from '../../package.json';
-import { UI } from '../configs/app.json';
+import APP_CONFIG from '../configs/app';
 import { appVersion, cacheProgramHTML, primaryThemeColor, secondaryThemeColor, textColor } from '../strings/store';
 
 export default class StoreManager extends Store {
@@ -14,14 +14,14 @@ export default class StoreManager extends Store {
       this.deleteProgramListCache();
     }
     if (this.get(primaryThemeColor) == null) {
-      this.set(primaryThemeColor, UI.THEME.PRIMARY);
+      this.set(primaryThemeColor, APP_CONFIG.UI.THEME.PRIMARY);
     }
     if (this.get(secondaryThemeColor) == null) {
-      this.set(secondaryThemeColor, UI.THEME.SECONDARY);
+      this.set(secondaryThemeColor, APP_CONFIG.UI.THEME.SECONDARY);
     }
     this.delete(textColor);
     if (this.get(textColor) == null) {
-      this.set(textColor, UI.THEME.TEXT);
+      this.set(textColor, APP_CONFIG.UI.THEME.TEXT);
     }
   };
 

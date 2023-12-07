@@ -1,6 +1,6 @@
 import path from 'path';
 import { app, Menu, Tray } from 'electron';
-import { APP_NAME } from '../configs/app.json';
+import APP_CONFIG from '../configs/app';
 
 export default class TrayManager {
   constructor({ foregroundProgramTracker, windowHandler, eventEmitter }) {
@@ -56,7 +56,7 @@ export default class TrayManager {
   setTray = () => {
     const fileExtension = process.platform === 'linux' ? 'png' : 'ico';
     const tray = new Tray(path.join(__dirname, 'assets', 'images', 'core', `tray.${fileExtension}`));
-    tray.setToolTip(APP_NAME);
+    tray.setToolTip(APP_CONFIG.APP_NAME);
 
     tray.on('click', () => {
       tray.popUpContextMenu();

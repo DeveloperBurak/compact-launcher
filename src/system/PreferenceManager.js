@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { writeFile } from '../helpers/file';
-import { defaults as defaultPreferences } from '../configs/preferences.json';
+import PREFERENCE_CONFIG from '../configs/preferences';
 import { getPathOf } from './FileManager';
 
 export default class PreferenceManager {
@@ -19,14 +19,14 @@ export default class PreferenceManager {
     try {
       await fs.access(this.preferencePath);
     } catch (err) {
-      writeFile(this.preferencePath, JSON.stringify(defaultPreferences), { flag: 'w' });
+      writeFile(this.preferencePath, JSON.stringify(PREFERENCE_CONFIG.defaults), { flag: 'w' });
     }
 
     try {
       const file = await fs.readFile(this.preferencePath);
       this.preferences = JSON.parse(file.toString('utf8'));
     } catch (err) {
-      this.preferences = defaultPreferences;
+      this.preferences = PREFERENCE_CONFIG.defaults;
       this.userManager.setFirst(true);
     }
   };

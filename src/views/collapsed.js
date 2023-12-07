@@ -1,5 +1,4 @@
 /* global window, document */
-
 import { getSetting, moveFile, openExpandWindow } from '../strings/ipc';
 import { expandOnHover } from '../strings/settings';
 import './app';

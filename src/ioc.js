@@ -1,5 +1,5 @@
 import EE from 'events';
-import { SERVER_URL } from './configs/app.json';
+import APP_CONFIG from './configs/app';
 import ForegroundProgramTracker from './system/ForegroundProgramTracker';
 import ListUI from './system/ListUI';
 import NotificationHandler from './system/NotificationHandler';
@@ -23,7 +23,7 @@ export const windowHandler = new WindowHandler({ steamDriver, preferenceManager,
 export const foregroundProgramTracker = new ForegroundProgramTracker({ windowHandler, eventEmitter });
 export const programHandler = new ProgramHandler();
 export const ListUIObj = new ListUI();
-export const programImageManager = new ProgramImageManager(`${SERVER_URL}api/programs`);
+export const programImageManager = new ProgramImageManager(`${APP_CONFIG.SERVER_URL}api/programs`);
 export const trayManager = new TrayManager({ foregroundProgramTracker, windowHandler, eventEmitter });
 export const timer = new Timer({ eventEmitter });
 export const notificationHandler = new NotificationHandler({ windowHandler, eventEmitter });
