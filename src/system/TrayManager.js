@@ -12,27 +12,19 @@ export default class TrayManager {
   generateMenu = () => {
     const menu = [];
 
-    let blacklist;
-    if (this.foregroundProgramTracker.isInBlacklist(this.foregroundProgramTracker.activeProgram)) {
-      blacklist = {
-        label: `Remove From Blacklist${
-          this.foregroundProgramTracker && this.foregroundProgramTracker.activeProgram ? ` (${this.foregroundProgramTracker.activeProgram})` : ''
-        }`,
-        click: () => {
-          this.foregroundProgramTracker.removeFromBlacklist();
-        },
-      };
-    } else {
-      blacklist = {
-        label: `Add to Blacklist${
-          this.foregroundProgramTracker && this.foregroundProgramTracker.activeProgram ? ` (${this.foregroundProgramTracker.activeProgram})` : ''
-        }`,
-        click: () => {
-          this.foregroundProgramTracker.addToBlacklist();
-        },
-      };
+    for (const program of this.foregroundProgramTracker.lastActivePrograms) {
+      const blacklist = {};
+
+      if (this.foregroundProgramTracker.isInBlacklist(program)) {
+        blacklist.label = `Remove From Blacklist (${program})`;
+        blacklist.click = () => this.foregroundProgramTracker.removeFromBlacklist(program);
+      } else {
+        blacklist.label = `Add to Blacklist (${program})`;
+        blacklist.click = () => this.foregroundProgramTracker.addToBlacklist(program);
+      }
+
+      menu.push(blacklist);
     }
-    menu.push(blacklist);
 
     const settings = {
       label: 'Settings',

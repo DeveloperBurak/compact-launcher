@@ -11,6 +11,8 @@ export default class ForegroundProgramTracker {
     this.blackList = [];
     this.exludeForActivePrograms = ForegroundProgramTracker.excludeForActiveProgram();
     this.activeProgram = null;
+    this.lastActivePrograms = [];
+    this.lastActiveProgramCount = 3;
     this.forbiddenProgramsFile = path.join(getPathOf('userdata'), 'forbidden-programs.json');
     this.trackingInterval = null;
     this.eventEmitter = eventEmitter;
@@ -46,18 +48,28 @@ export default class ForegroundProgramTracker {
     if (this.trackingInterval != null) clearInterval(this.trackingInterval);
   };
 
-  addToBlacklist = () => {
-    if (this.blackList.indexOf(this.activeProgram) === -1) {
-      this.blackList.push(this.activeProgram);
+  addToBlacklist = (programName) => {
+    let program = programName;
+    if (!program) {
+      program = this.activeProgram;
+    }
+
+    if (this.blackList.indexOf(program) === -1) {
+      this.blackList.push(program);
       fs.writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList));
       this.setAlwaysOnTop();
       this.eventEmitter.emit('forceUpdateTrayMenu');
     }
   };
 
-  removeFromBlacklist = () => {
-    if (this.blackList.indexOf(this.activeProgram) !== -1) {
-      this.blackList.splice(this.blackList.indexOf(this.activeProgram), 1);
+  removeFromBlacklist = (programName) => {
+    let program = programName;
+    if (!program) {
+      program = this.activeProgram;
+    }
+
+    if (this.blackList.indexOf(program) !== -1) {
+      this.blackList.splice(this.blackList.indexOf(program), 1);
       fs.writeFile(this.forbiddenProgramsFile, JSON.stringify(this.blackList));
       this.setAlwaysOnTop();
       this.eventEmitter.emit('forceUpdateTrayMenu');
@@ -72,6 +84,14 @@ export default class ForegroundProgramTracker {
       this.activeProgram !== foregroundProgram.owner.name
     ) {
       this.activeProgram = foregroundProgram.owner.name;
+
+      if (this.lastActivePrograms.indexOf(this.activeProgram) === -1) {
+        this.lastActivePrograms.push(this.activeProgram);
+        if (this.lastActivePrograms.length > this.lastActiveProgramCount) {
+          this.lastActivePrograms.splice(0, 1);
+        }
+      }
+
       this.eventEmitter.emit('forceUpdateTrayMenu');
       this.setAlwaysOnTop();
     }
